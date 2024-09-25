@@ -1,1 +1,47 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Importing Bootstrap SCSS file. */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+th[sortable] {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+th[sortable].desc:before,th[sortable].asc:before {
+    content: "";
+    display: block;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAmxJREFUeAHtmksrRVEUx72fH8CIGQNJkpGUUmakDEiZSJRIZsRQmCkTJRmZmJgQE0kpX0D5DJKJgff7v+ru2u3O3vvc67TOvsdatdrnnP1Y///v7HvvubdbUiIhBISAEBACQkAICAEhIAQ4CXSh2DnyDfmCPEG2Iv9F9MPlM/LHyAecdyMzHYNwR3fdNK/OH9HXl1UCozD24TCvILxizEDWIEzA0FcM8woCgRrJCoS5PIwrANQSMAJX1LEI9bqpQo4JYNFFKRSvIgsxHDVnqZgIkPnNBM0rIGtYk9YOOsqgbgepRCfdbmFtqhFkVEDVPjJp0+Z6e6hRHhqBKgg6ZDCvYBygVmUoEGoh5JTRvIJwhJo1aUOoh4CLPMyvxxi7EWOMgnCGsXXI1GIXlZUYX7ucU+kbR8NW8lh3O7cue0Pk32MKndfUxQFAwxdirk3fHappAnc0oqDPzDfGTBrCfHP04dM4oTV8cxr0SVzH9FF07xD3ib6xCDE+M+aUcVygtWzzbtGX2rPBrEUYfecfQkaFzYi6HjVnGBdtL7epqAlc1+jRdAap74RrnPc4BCijttY2tRcdN0g17w7HqZrXhdJTYAuS3hd8z+vKgK3V1zWPae0mZDMykadBn1hTQBLnZNwVrJpSe/NwEeDsEwCctEOsJTsgxLvCqUl2ACftEGvJDgjxrnBqkh3ASTvEWrIDQrwrnJpkB3DSDrGW7IAQ7wqnJtkBnLRztejXXVu4+mxz/nQ9jR1w5VB86ejLTFcnnDwhzV+F6T+CHZlx6THSjn76eyyBIOPHyDakhBAQAkJACAgBISAEhIAQYCLwC8JxpAmsEGt6AAAAAElFTkSuQmCC) no-repeat;
+    background-size: 22px;
+    width: 22px;
+    height: 22px;
+    float: left;
+    margin-left: -10px;
+    margin-right: 0;
+}
+
+th[sortable]:before {
+    content: "";
+    display: block;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADjUlEQVR4nO3bT4gcRRTH8Q/LIkFCWEIIImERWYIHkVwElRAEISpEhSBhBQ8SNYj/ULxIECFIDh48iQTJwbN4CMlFxH+IJCAeBCUGFVHUIIq6inE3Oq56KBs2vT3T3dPdVdPLfOFdut++fr/HbFV19Sva4T6cxQCf4QnMtBR74nke/xbY8ZRJxeJpxeIzey5dat1zyGjxmT2UKsEuOYBV1Qqwiv1p0uyGvfhTNfGZrWBPimTb5ib8oZ74zH7GtfFTbo/rsGQ88Zl9ix2xE2+DBXyvmfjMzmIubvrNuBJfakd8Zu9jU0wR47IVn2hXfGYnTPhqcTM+0I34zI5FU1OTy/CmbsVndjiSplq8plry406JeTsYR1Y17lYt6S+EZe4on5eE+b8s1gC7YojLUzQI3VXh777DLfixxO8c7sByid8snqzw3NYpKkDZ9PQTbsU3FZ9xBvfg7xK/hYrxWqWoAO+N8L+A2/FpzeecwiMlPlUL2jmb8JHiAe/mnO/+Ar+19mjO/8gQv1UT9rI0Jwxg5/EbXlc8SNUtAGGTZLDGZwUPtJt+PMYpAFyFe7GI7Z1nOYLZRM/9+n9LzkSvxWMwLUDqBFLTpwIs4rSwq/Qu9qVNJzDuLFCXZ4fEf7il+GMTowDzLl035BdnjbbX+vAvsMfw6fpy3NAkeB8KsLnk/pYmwftQgE6ZFiB1AqmZFiB1AqmZFqDh3/9acv+XhvE7p2kBzgibpEUs462G8TunaQEu4n78lbv+Dx5Tvm2enDZ2hE7hekHwgrC7+7Lw65h42toS+xgPthQrKtNZIHUCqUm1KxyDncKr8jLeMYFT8hV4BT8IzVcnhKTzlH2BPpDzn8GLLu1j/F346j0xbFXcd7Rk/ReougU4NsRvoKBNL9UY8BSuLrg+hzcU/xKq8IzhrbmzCmaqVAXYPeLedqE9p24/4UHlzdnz+QupCnCx5P68UIRtFePtExZfZXyev5CqACcr+FwjfJUu2/O7Ea8qn9EuqFakKMzibdV6kdpoxBrgzijKarAFH2ouroodiqSpNtuERqouxR+JpmZMduAr3YjvzbmlncKKsE3xJ/Vsqb9L8/MImZ0WPpv1jt2aj/rnhKV2b7lN/TNJmZ1XsNrrI4uqn0rLbEk41rNhKHsLXGsr1jdxbggOKxe/av0r8YbiBaML0FYbzkRzXLH4oymTiskMHhcOaQyEo3etnDL5D04FfoVx6MwlAAAAAElFTkSuQmCC) no-repeat;
+    background-size: 22px;
+    width: 22px;
+    height: 22px;
+    float: left;
+    margin-left: -10px;
+    margin-right: 4px;    
+}
+
+th[sortable].desc:before {
+    transform: rotate(180deg);
+    -ms-transform: rotate(180deg)
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
