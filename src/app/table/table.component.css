@@ -21,3 +21,7 @@
 .selectable {
     cursor: pointer;
 }
+
+img {
+    height: 70px;
+}
