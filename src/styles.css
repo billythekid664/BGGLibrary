@@ -39,6 +39,11 @@ th[sortable].desc:before {
     -ms-transform: rotate(180deg)
 }
 
+ul.pagination {
+    margin-top: unset;
+    margin-bottom: unset;
+}
+
 html, body {
     height: 100%;
     margin: 0;

@@ -1,4 +1,4 @@
-<div class="parent-container">
+<div class="parent-container table-responsive">
     <form>
       <div class="mb-3 row">
         <label for="table-complete-search" class="col-xs-3 col-sm-auto col-form-label">Game search:</label>
@@ -14,98 +14,104 @@
         <!-- <span *ngIf="loading" class="col col-form-label">Loading...</span> -->
       </div>
   
-      <table class="table table-striped table-hover">
-        <thead>
-          <tr>
-            <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
-            <th scope="col" sortable="last_checkout_date" (sort)="onSort($event)">Availability</th>
-            <th scope="col">Player Count</th>
-            <th scope="col">Play Time</th>
-            <!-- <th scope="col"></th> -->
-          </tr>
-        </thead>
-        <tbody style="vertical-align: middle;">
-            @if (loading) {
-                <td colspan="4">
-                    <div class="single-item-container">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover">
+            <thead>
+              <tr>
+                <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
+                <th scope="col" sortable="last_checkout_date" (sort)="onSort($event)">Availability</th>
+                <th scope="col">Player Count</th>
+                <th scope="col">Play Time</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody class="align-middle">
+                @if (loading) {
+                    <td colspan="4">
+                        <div class="single-item-container">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
                         </div>
-                    </div>
-                </td>
-            }
-            @else if (items && items.length > 0) {
-                <ng-container *ngFor="let item of items; let i = index">
-                    <tr>
-                        <td>
-                            <div class="flex-container">
-                                <img alt="Game Icon" [attr.src]="item.bgg_icon_uri">
-                                <a target="_blank" href="https://boardgamegeek.com/boardgame/{{item.bgg_id}}"><ngb-highlight [result]="item.name.normalize('NFC')" [term]="searchTerm" /></a>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="flex-container">
-                                <ng-container *ngIf="item.is_checked_out === 0; else checkedOut">Available</ng-container>
-                                <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(item.last_checkout_date) }}</ng-template>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="flex-container">
-                                {{ item.min_players }} <ng-container *ngIf="item.max_players !== item.min_players">- {{ item.max_players }}</ng-container>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="flex-container">
-                                {{ item.min_play_time }} <ng-container *ngIf="item.max_play_time !== item.min_play_time">- {{ item.max_play_time }}</ng-container> minutes
-                            </div>
-                        </td>
-                        <!-- <td>
-                            <div class="fs-3 flex-container selectable" (click)="addToAccount(item)">
-                                <i class="bi bi-plus-circle-fill text-primary"></i>
-                            </div>
-                        </td> -->
-                    </tr>
-                    <!-- <div ngbAccordion *ngIf="accordionItem === 'accordion-' + i">
-                        <div ngbAccordionItem [collapsed]="false">
-                            <div ngbAccordionCollapse>
-                                <div ngbAccordionBody>
-                                    <ng-template>
-                                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon
-                                        officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf
-                                        moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim
-                                        keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur
-                                        butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably
-                                        haven't heard of them accusamus labore sustainable VHS.
-                                    </ng-template>
+                    </td>
+                }
+                @else if (items && items.length > 0) {
+                    <ng-container *ngFor="let item of items; let i = index">
+                        <tr>
+                            <td>
+                                <div class="flex-container" style="min-width: 200px">
+                                    <img class="img-thumbnail img-fluid" alt="Game Icon" [attr.src]="item.bgg_icon_uri">
+                                    <a target="_blank" href="https://boardgamegeek.com/boardgame/{{item.bgg_id}}"><ngb-highlight [result]="item.name.normalize('NFC')" [term]="searchTerm" /></a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="flex-container" style="min-width: 100px">
+                                    <ng-container *ngIf="item.is_checked_out === 0; else checkedOut">Available</ng-container>
+                                    <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(item.last_checkout_date) }}</ng-template>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="flex-container">
+                                    {{ item.min_players }} <ng-container *ngIf="item.max_players !== item.min_players">- {{ item.max_players }}</ng-container>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="flex-container">
+                                    {{ item.min_play_time }} <ng-container *ngIf="item.max_play_time !== item.min_play_time">- {{ item.max_play_time }}</ng-container> minutes
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fs-3 flex-container selectable" (click)="addToAccount(item)">
+                                    <i class="bi bi-plus-circle-fill text-primary"></i>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- <div ngbAccordion *ngIf="accordionItem === 'accordion-' + i">
+                            <div ngbAccordionItem [collapsed]="false">
+                                <div ngbAccordionCollapse>
+                                    <div ngbAccordionBody>
+                                        <ng-template>
+                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon
+                                            officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf
+                                            moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim
+                                            keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur
+                                            butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably
+                                            haven't heard of them accusamus labore sustainable VHS.
+                                        </ng-template>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div> -->
-                </ng-container>
-            }
-            @else {
-                <tr>
-                    <td colspan="4" >
-                        <div class="single-item-container">
-                            <p>No Games found</p>
-                        </div>
-                        
-                    </td>
-                </tr>
-            }
-        </tbody>
-      </table>
+                        </div> -->
+                    </ng-container>
+                }
+                @else {
+                    <tr>
+                        <td colspan="4" >
+                            <div class="single-item-container">
+                                <p>No Games found</p>
+                            </div>
+                            
+                        </td>
+                    </tr>
+                }
+            </tbody>
+          </table>
+      </div>
   
-      <div class="d-flex justify-content-between p-2">
-        <ngb-pagination [collectionSize]="paging.total_items" [(page)]="pageNumber" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize">
-        </ngb-pagination>
-  
-        <select class="form-select" style="width: auto" name="pageSize" [(ngModel)]="pageSize">
-          <option [ngValue]="10">10 items per page</option>
-          <option [ngValue]="25">25 items per page</option>
-          <option [ngValue]="50">50 items per page</option>
-          <option [ngValue]="100">100 items per page</option>
-        </select>
+      <div class="d-flex flex-wrap align-items-center align-content-between justify-content-between p-2 mb-3" >
+        <div id="pagination-container" class="pt-2">
+            <ngb-pagination [collectionSize]="paging.total_items" [(page)]="pageNumber" [maxSize]="3" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize"></ngb-pagination>
+        </div>
+        
+        <div id="select-container" class="pt-2">
+            <select style="width: fit-content;" class="form-select" name="pageSize" [(ngModel)]="pageSize">
+                <option [ngValue]="10">10 items per page</option>
+                <option [ngValue]="25">25 items per page</option>
+                <option [ngValue]="50">50 items per page</option>
+                <option [ngValue]="100">100 items per page</option>
+            </select>
+        </div>
+        
       </div>
   </form>
   <pre>Page number: {{ pageNumber }}</pre>

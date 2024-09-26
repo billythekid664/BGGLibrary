@@ -1,6 +1,6 @@
 .parent-container {
     margin: auto;
-    padding: 20px
+    padding: 8px
 }
 
 .single-item-container {
@@ -24,4 +24,28 @@
 
 img {
     height: 70px;
+}
+
+@media (max-width: 768px) { 
+    img {
+        height: 48px;
+    }
+}
+
+@media(max-width: 556px) {
+    #pagination-container {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #select-container {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (min-width: 768px) { 
+    #select-container {
+        margin-left: auto;
+    }
 }
