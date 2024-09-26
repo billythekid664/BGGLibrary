@@ -1,6 +1,6 @@
 .parent-container {
     margin: auto;
-    padding: 8px
+    padding: 12px
 }
 
 .single-item-container {
@@ -32,7 +32,7 @@ img {
     }
 }
 
-@media(max-width: 556px) {
+@media(max-width: 575px) {
     #pagination-container {
         margin-left: auto;
         margin-right: auto;
