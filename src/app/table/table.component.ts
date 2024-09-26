@@ -12,11 +12,10 @@ import { BggItem } from '../model/bgg.model';
   selector: 'app-table',
   standalone: true,
   imports: [CommonModule, NgbdSortableHeader, FormsModule, NgbModule, ReactiveFormsModule],
-  providers: [BggService],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
-export class TableComponent implements OnInit, AfterViewInit {
+export class TableComponent implements AfterViewInit {
   @ViewChildren(NgbdSortableHeader) headers!: QueryList<NgbdSortableHeader>;
 
   bggData: any = {};
@@ -35,10 +34,6 @@ export class TableComponent implements OnInit, AfterViewInit {
   debounceTimer: any;
 
   constructor(private bggService: BggService) {}
-
-  ngOnInit() {
-    this.getBggInfo();
-  }
 
   ngAfterViewInit() {
     setTimeout(() => { 
@@ -69,7 +64,7 @@ export class TableComponent implements OnInit, AfterViewInit {
 
 		this.sortColumn = column;
 		this.sortDirection = direction;
-    this.startFetch();
+    this.startFetch(100);
 	}
 
   startFetch(delay = 500) {
