@@ -44,6 +44,10 @@ ul.pagination {
     margin-bottom: unset;
 }
 
+.form-floating > label {
+    z-index: 5;
+}
+
 html, body {
     height: 100%;
     margin: 0;

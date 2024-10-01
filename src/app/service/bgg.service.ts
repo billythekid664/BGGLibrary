@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BggItem } from '../model/bgg.model';
 
-interface SearchResult {
+export interface SearchResult {
   result: {
     items: BggItem[];
 	  paging: number;

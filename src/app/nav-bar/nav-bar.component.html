@@ -13,7 +13,12 @@
             </li>
             </ul>
             <div class="d-flex" role="search">
-                <a class="nav-link text-light" [ngClass]="active === 3 ? 'active fw-bold' : ''" [routerLink]="['login']" (click)="setActive(3)">Login</a>
+                @if(loggedIn) {
+                    <a class="nav-link text-light" href="#" (click)="logout()">Logout</a>
+                }
+                @else {
+                    <a class="nav-link text-light" [ngClass]="active === 3 ? 'active fw-bold' : ''" [routerLink]="['login']" [queryParams]="redirectUrl" (click)="setActive(3)">Login</a>
+                }
             </div>
         </div>
     </div>

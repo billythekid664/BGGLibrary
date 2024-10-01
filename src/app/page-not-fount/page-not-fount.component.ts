@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ErrorPageService } from '../service/error-page.service';
+import { HideNavService } from '../service/hide-nav.service';
 
 @Component({
   selector: 'app-page-not-fount',
@@ -11,13 +11,13 @@ import { ErrorPageService } from '../service/error-page.service';
 })
 export class PageNotFountComponent implements OnInit, OnDestroy {
 
-  constructor(private errorPageService: ErrorPageService) { }
+  constructor(private hideNavService: HideNavService) { }
 
   ngOnInit(): void {
-    this.errorPageService.setOnErrorPage(true);
+    this.hideNavService.setHideNav(true);
   }
 
   ngOnDestroy(): void {
-      this.errorPageService.setOnErrorPage(false)
+      this.hideNavService.setHideNav(false);
   }
 }
