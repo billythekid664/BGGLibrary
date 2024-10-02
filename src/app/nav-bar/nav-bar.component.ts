@@ -16,7 +16,6 @@ import { User } from '../model/user.model';
   styleUrl: './nav-bar.component.css'
 })
 export class NavBarComponent implements OnInit, OnDestroy {
-  private auth = inject(Auth);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private userService = inject(UserService);
@@ -25,6 +24,7 @@ export class NavBarComponent implements OnInit, OnDestroy {
   userSubscription: any;
   querySub: any;
   redirectUrl = { redirectUrl: '/' }
+  displayName?: string;
 
   ngOnInit(): void {
     this.querySub = this.route.queryParams.subscribe(params => {
@@ -34,11 +34,8 @@ export class NavBarComponent implements OnInit, OnDestroy {
         this.redirectUrl = { redirectUrl: '/' };
       }
     });
-    this.userSubscription = authState(this.auth).pipe(
-        traceUntilFirst('auth'),
-      ).subscribe((user: any) => {
+    this.userSubscription = this.userService.checkAuth().subscribe((user: any) => {
         this.loggedIn = !!user;
-        console.log('user: ', user.uid)
         if (!!user?.uid) {
           this.getUserData(user?.uid);
         }
@@ -54,22 +51,17 @@ export class NavBarComponent implements OnInit, OnDestroy {
   }
 
   getUserData(uid: string) {
-    console.log('Getting user data for uid:', uid);
     this.userService.getUser(uid).subscribe((user: any) => {
-    // .then((user: any) => {
-    //   // update user data here
-      console.log('User data:', user);
+      if (user) {
+        this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();      
+      }
     });
   }
 
-  login() {
-    this.router.navigate(['/login'], { queryParams: this.redirectUrl });
-  }
-
   logout() {
-    this.auth.signOut();
-    this.auth.updateCurrentUser(null);
+    this.userService.signUserOut();
     this.loggedIn = false;
     this.router.navigate(['/']);
+    this.active = 1;
   }
 }

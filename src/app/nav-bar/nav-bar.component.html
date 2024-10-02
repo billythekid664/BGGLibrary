@@ -5,19 +5,27 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-                <a class="nav-link text-light" [ngClass]="active === 1 ? 'active fw-bold' : ''" [routerLink]="['library/home']" (click)="setActive(1)">Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" [ngClass]="active === 2 ? 'active fw-bold' : ''" [routerLink]="['library/user']" (click)="setActive(2)">User</a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link text-light" [ngClass]="active === 1 ? 'active fw-bolder' : ''" [routerLink]="['library/home']" (click)="setActive(1)">
+                        Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-light" [ngClass]="active === 2 ? 'active fw-bolder' : ''" [routerLink]="['library/user']" (click)="setActive(2)">
+                        User
+                    </a>
+                </li>
             </ul>
-            <div class="d-flex" role="search">
+            <div class="d-flex align-items-center gap-2">
                 @if(loggedIn) {
+                    <span class="text-light">{{displayName}}</span>
+                    <div class="vr mh-100" style="height: 40px; width: 2px;"></div>
                     <a class="nav-link text-light" href="#" (click)="logout()">Logout</a>
                 }
                 @else {
-                    <a class="nav-link text-light" [ngClass]="active === 3 ? 'active fw-bold' : ''" [routerLink]="['login']" [queryParams]="redirectUrl" (click)="setActive(3)">Login</a>
+                    <a class="nav-link text-light" [ngClass]="active === 3 ? 'active fw-bolder' : ''" [routerLink]="['login']" [queryParams]="redirectUrl" (click)="setActive(3)">
+                        Login
+                    </a>
                 }
             </div>
         </div>

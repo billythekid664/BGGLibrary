@@ -1,12 +1,14 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-import { map, Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { HideNavService } from '../service/hide-nav.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { Auth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, user } from '@angular/fire/auth';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../service/user.service';
+import { UserCredential } from 'firebase/auth';
+import { User } from '../model/user.model';
+import { getAdditionalUserInfo } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +18,6 @@ import { UserService } from '../service/user.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private auth = inject(Auth);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
@@ -117,23 +118,20 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    signInWithEmailAndPassword(this.auth, this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
-      console.log('User credential login:', userCredential);
+    this.userService.signUserIn(this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
       this.router.navigate([this.redirectUrl]);
      }).catch((error: any) => {
-      console.error('Error logging in:', error);
       this.cantLogin = true;
      });
   }
 
   onSubmitRegister() {
-    createUserWithEmailAndPassword(this.auth, this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
-      console.log('User credential register:', userCredential);
+    this.userService.createUser(this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
       this.userService.addUser({
         uid: userCredential.user.uid,
         firstName: this.loginForm.value.firstName,
         lastName: this.loginForm.value.lastName,
-        provider: userCredential.user.providerId
+        provider: userCredential.providerId
       });
       this.router.navigate([this.redirectUrl]);
     }).catch((error: any) => {
@@ -143,8 +141,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   googleLogin() {
-    signInWithPopup(this.auth, new GoogleAuthProvider()).then((userCredential: any) => {
-      console.log('User credential Google:', userCredential);
+    this.userService.signUserInWithGoogle().then((userCredential: any) => {
+      if (getAdditionalUserInfo(userCredential)?.isNewUser) {
+        this.userService.addUser({
+          uid: userCredential.user.uid,
+          firstName: userCredential.user.displayName.split(' ')[0],
+          lastName: userCredential.user.displayName.split(' ')[1],
+          provider: userCredential.providerId
+        });
+      }
       this.router.navigate([this.redirectUrl]);
     }).catch(error => {
       console.error('Error logging in with Google:', error);

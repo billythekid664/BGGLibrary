@@ -9,11 +9,7 @@ import { collection, collectionData, Firestore } from '@angular/fire/firestore';
   styleUrl: './user.component.css'
 })
 export class UserComponent implements OnInit {
-  private firestore = inject(Firestore);
 
   ngOnInit() {
-    collectionData(collection(this.firestore, 'users')).subscribe((users: any) => {
-      console.log('Users:', users);
-    })
   }
 }
