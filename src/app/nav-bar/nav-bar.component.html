@@ -20,11 +20,11 @@
                 @if(loggedIn) {
                     <span class="text-light">{{displayName}}</span>
                     <div class="vr mh-100" style="height: 40px; width: 2px;"></div>
-                    <a class="nav-link text-light" href="#" (click)="logout()">Logout</a>
+                    <a class="nav-link text-light" href="#" (click)="logout()">Sign Out</a>
                 }
                 @else {
                     <a class="nav-link text-light" [ngClass]="active === 3 ? 'active fw-bolder' : ''" [routerLink]="['login']" [queryParams]="redirectUrl" (click)="setActive(3)">
-                        Login
+                        Sign In
                     </a>
                 }
             </div>
