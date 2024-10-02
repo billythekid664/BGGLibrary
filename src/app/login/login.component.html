@@ -1,4 +1,4 @@
-<div *ngIf="!!loginForm" class="shadow rounded card text-center bg-body position-absolute top-50 start-50 translate-middle" style="width: 400px;">
+<div *ngIf="!!loginForm" class="shadow rounded card text-center bg-body position-absolute top-50 start-50 translate-middle" style="width: 500px;">
     <div class="card-body">
         <h1 class="mt-4 mb-4">{{ !isRegister ? 'Login' : 'Register' }}</h1>
         @if (!isRegister) {
@@ -18,29 +18,24 @@
                 <div class="input-group has-validation mb-4">
                     <div class="form-floating" [ngClass]="loginForm.get('password')?.dirty && loginForm.get('password')?.invalid ? 'is-invalid': ''">
                         <input type="password" id="password" class="form-control" [ngClass]="loginForm.get('password')?.dirty && loginForm.get('password')?.invalid ? 'is-invalid': ''" aria-describedby="passwordHelpBlock" formControlName="password" placeholder="password">
-                        <label for="password" >Password</label>                
+                        <label for="password" >Password</label>
                     </div>
                     <button class="btn btn-outline-secondary" (click)="togglePassword('togglePassword', 'password')" type="button">
                         <i class="bi bi-eye-slash fs-4" id="togglePassword"></i>
-                    </button> 
+                    </button>
                     <div class="invalid-feedback">
                         {{ checkPasswordErrors('password') }}
-                    </div> 
+                    </div>
                 </div>
-                
+
                 <div class="mt-4">
                     <button type="submit" [attr.disabled]="loginForm.invalid ? '' : undefined" class="btn btn-primary ps-4 pe-4 mb-3">Submit</button>
                 </div>
-                
-
-                <br/>
-                <br/>
                 <!-- <hr class="bg-secondary border-2 border-top border-secondary" /> -->
                 <hr class="dropdown-divider">
             </form>
             <button class="btn btn-link btn-sm" (click)="toggleRegister()">Register User</button>
-
-        } 
+        }
         @else {
             @if (cantRegister) {
                 <div class="text-danger">
@@ -48,6 +43,22 @@
                 </div>
             }
             <form [formGroup]="loginForm" (ngSubmit)="onSubmitRegister()">
+                <div class="input-group has-validation form-floating mb-4 mt-4">
+                  <div class="form-floating" [ngClass]="loginForm.get('firstName')?.dirty && loginForm.get('firstName')?.invalid ? 'is-invalid': ''">
+                    <input type="text" id="inputFirst" class="form-control" [ngClass]="loginForm.get('firstName')?.dirty && loginForm.get('firstName')?.invalid ? 'is-invalid': ''" aria-describedby="firstNameHelp" formControlName="firstName" placeholder="">
+                    <label for="inputFirst">First Name</label>
+                    <div class="invalid-feedback">
+                        First name is required
+                    </div>
+                  </div>
+                  <div class="form-floating" [ngClass]="loginForm.get('lastName')?.dirty && loginForm.get('lastName')?.invalid ? 'is-invalid': ''">
+                    <input type="text" id="inputLast" class="form-control" [ngClass]="loginForm.get('lastName')?.dirty && loginForm.get('lastName')?.invalid ? 'is-invalid': ''" aria-describedby="lastNameHelp" formControlName="lastName" placeholder="">
+                    <label for="inputLast">Last Name</label>
+                    <div class="invalid-feedback">
+                        Last name is required
+                    </div>
+                  </div>
+                </div>
                 <div class="form-floating mb-4 mt-4">
                     <input type="email" id="inputEmail1" class="form-control" [ngClass]="loginForm.get('email')?.dirty && loginForm.get('email')?.invalid ? 'is-invalid': ''" aria-describedby="emailHelp" formControlName="email" placeholder="name@example.com">
                     <label for="inputEmail1">Email address</label>
@@ -58,39 +69,45 @@
                 <div class="input-group has-validation mb-4">
                     <div class="form-floating" [ngClass]="loginForm.get('password')?.dirty && loginForm.get('password')?.invalid ? 'is-invalid': ''">
                         <input type="password" id="password" class="form-control" [ngClass]="loginForm.get('password')?.dirty && loginForm.get('password')?.invalid ? 'is-invalid': ''" aria-describedby="passwordHelpBlock" formControlName="password" placeholder="password">
-                        <label for="password" >Password</label>                
+                        <label for="password" >Password</label>
                     </div>
                     <button class="btn btn-outline-secondary" (click)="togglePassword('togglePassword', 'password')" type="button">
                         <i class="bi bi-eye-slash fs-4" id="togglePassword"></i>
-                    </button> 
+                    </button>
                     <div class="invalid-feedback">
                         {{ checkPasswordErrors('password') }}
-                    </div> 
+                    </div>
                 </div>
 
                 <div class="input-group has-validation mb-4">
                     <div class="form-floating" [ngClass]="loginForm.get('confirmPassword')?.dirty && loginForm.get('confirmPassword')?.invalid ? 'is-invalid': ''">
                         <input type="password" id="confirmPassword" class="form-control" [ngClass]="loginForm.get('confirmPassword')?.dirty && loginForm.get('confirmPassword')?.invalid ? 'is-invalid': ''" aria-describedby="confirmPasswordHelpBlock" formControlName="confirmPassword" placeholder="confirmPassword">
-                        <label for="confirmPassword">Confirm Password</label>                
+                        <label for="confirmPassword">Confirm Password</label>
                     </div>
                     <button class="btn btn-outline-secondary" (click)="togglePassword('toggleConfirmPassword', 'confirmPassword')" type="button">
                         <i class="bi bi-eye-slash fs-4" id="toggleConfirmPassword"></i>
-                    </button> 
+                    </button>
                     <div class="invalid-feedback">
                         {{ checkPasswordErrors('confirmPassword') }}
-                    </div> 
+                    </div>
                 </div>
-                
+
                 <div class="mt-4">
                     <button type="submit" [attr.disabled]="loginForm.invalid ? '' : undefined" class="btn btn-primary ps-4 pe-4 mb-3">Submit</button>
                 </div>
-                
 
-                <br/>
-                <br/>
+
                 <hr class="dropdown-divider">
-            </form> 
+            </form>
             <button class="btn btn-link btn-sm" (click)="toggleRegister()">Login instead</button>
         }
+        <br/>
+        <br/>
+        <br/>
+        <hr class="dropdown-divider">
+        <p class="text-center">Or sign in with</p>
+        <button class="btn btn-outline-primary text-center" (click)="googleLogin()">
+          <i class="bi bi-google"></i> Google
+        </button>
     </div>
 </div>

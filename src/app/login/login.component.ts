@@ -1,14 +1,12 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-// import { Auth, user, AngularFireAuth } from '@angular/fire/auth';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { map, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { HideNavService } from '../service/hide-nav.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Auth, authState, createUserWithEmailAndPassword, signInWithEmailAndPassword, user } from '@angular/fire/auth';
+import { Auth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, user } from '@angular/fire/auth';
 import { ActivatedRoute, Router } from '@angular/router';
-import { traceUntilFirst } from '@angular/fire/performance';
+import { UserService } from '../service/user.service';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +20,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private userService = inject(UserService);
   userSubscription?: Subscription;
   loginForm!: FormGroup;
   isRegister: boolean = false;
@@ -59,6 +58,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   createRegisterForm() {
     this.loginForm = this.fb.group({
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(20), Validators.pattern( /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_@$!%*?&])[A-Za-z\d_@$!%*?&]{8,20}$/)]],
       confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]]
@@ -108,7 +109,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       console.log('Switching to login form');
       this.createLoginForm();
       this.isRegister = !this.isRegister;
-    } else { 
+    } else {
       console.log('Switching to register form');
       this.createRegisterForm();
       this.isRegister = !this.isRegister;
@@ -128,10 +129,26 @@ export class LoginComponent implements OnInit, OnDestroy {
   onSubmitRegister() {
     createUserWithEmailAndPassword(this.auth, this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
       console.log('User credential register:', userCredential);
+      this.userService.addUser({
+        uid: userCredential.user.uid,
+        firstName: this.loginForm.value.firstName,
+        lastName: this.loginForm.value.lastName,
+        provider: userCredential.user.providerId
+      });
       this.router.navigate([this.redirectUrl]);
     }).catch((error: any) => {
       console.error('Error registering:', error);
       this.cantRegister = true;
     });
   }
+
+  googleLogin() {
+    signInWithPopup(this.auth, new GoogleAuthProvider()).then((userCredential: any) => {
+      console.log('User credential Google:', userCredential);
+      this.router.navigate([this.redirectUrl]);
+    }).catch(error => {
+      console.error('Error logging in with Google:', error);
+    });
+  }
+
 }

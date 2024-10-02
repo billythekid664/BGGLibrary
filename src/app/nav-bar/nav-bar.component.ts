@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { Auth, authState, user } from '@angular/fire/auth';
+import { Auth, authState, signOut, user } from '@angular/fire/auth';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { traceUntilFirst } from '@angular/fire/performance';
 import { map } from 'rxjs';
+import { UserService } from '../service/user.service';
+import { User } from '../model/user.model';
 
 
 @Component({
@@ -17,6 +19,7 @@ export class NavBarComponent implements OnInit, OnDestroy {
   private auth = inject(Auth);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private userService = inject(UserService);
   active: number = 1;
   loggedIn: boolean = false;
   userSubscription: any;
@@ -33,9 +36,12 @@ export class NavBarComponent implements OnInit, OnDestroy {
     });
     this.userSubscription = authState(this.auth).pipe(
         traceUntilFirst('auth'),
-        map(u => !!u)
-      ).subscribe((isLoggedIn: boolean) => {
-        this.loggedIn = isLoggedIn;
+      ).subscribe((user: any) => {
+        this.loggedIn = !!user;
+        console.log('user: ', user.uid)
+        if (!!user?.uid) {
+          this.getUserData(user?.uid);
+        }
     });
   }
 
@@ -45,6 +51,15 @@ export class NavBarComponent implements OnInit, OnDestroy {
   }
   setActive(index: number): void {
     this.active = index;
+  }
+
+  getUserData(uid: string) {
+    console.log('Getting user data for uid:', uid);
+    this.userService.getUser(uid).subscribe((user: any) => {
+    // .then((user: any) => {
+    //   // update user data here
+      console.log('User data:', user);
+    });
   }
 
   login() {
