@@ -33,7 +33,11 @@ export class UserService {
   }
 
   signUserInWithGoogle(): Promise<UserCredential> {
-    return signInWithPopup(this.auth, new GoogleAuthProvider());
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: "select_account"
+  })
+    return signInWithPopup(this.auth, provider);
   }
 
   createUser(email: string, password: string): Promise<UserCredential> {
