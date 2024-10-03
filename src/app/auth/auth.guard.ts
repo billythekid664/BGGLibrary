@@ -1,14 +1,12 @@
 import { inject } from '@angular/core';
-import { Auth, authState } from '@angular/fire/auth';
-import { traceUntilFirst } from '@angular/fire/performance';
 import { CanActivateFn, Router } from '@angular/router';
 import { map } from 'rxjs';
+import { UserService } from '../service/user.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
-  let auth = inject(Auth);
+  let userService = inject(UserService);
   let router = inject(Router);
-  return authState(auth).pipe(
-    traceUntilFirst('auth'),
+  return userService.checkAuth().pipe(
     map(u => {
       if (u) {
         return true;

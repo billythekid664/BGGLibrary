@@ -8,10 +8,10 @@ import { isAuthGuard } from './auth/is-auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'library/home', pathMatch: "full"},
-    { path: 'login', component: LoginComponent, canActivate: [isAuthGuard] },
+    { path: 'login', component: LoginComponent, title: 'Login - BGG Library', canActivate: [isAuthGuard] },
     { path: 'library', redirectTo: 'library/home', pathMatch: "full"},
     { path: 'library/', redirectTo: 'library/home', pathMatch: "full"},
-    { path: 'library/home', component: TableComponent},
-    { path: 'library/user', component: UserComponent, canActivate: [authGuard]},
-    { path: '**', component: PageNotFountComponent }
+    { path: 'library/home', component: TableComponent, title: 'Home - BGG Library'},
+    { path: 'library/user', component: UserComponent, title: 'User - BGG Library', canActivate: [authGuard]},
+    { path: '**', component: PageNotFountComponent, title: 'Page Not Found - BGG Library' }
 ];

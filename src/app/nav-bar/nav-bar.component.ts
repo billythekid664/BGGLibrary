@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { Auth, authState, user } from '@angular/fire/auth';
+import { Auth, authState, signOut, user } from '@angular/fire/auth';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { traceUntilFirst } from '@angular/fire/performance';
 import { map } from 'rxjs';
+import { UserService } from '../service/user.service';
+import { User } from '../model/user.model';
 
 
 @Component({
@@ -14,14 +16,15 @@ import { map } from 'rxjs';
   styleUrl: './nav-bar.component.css'
 })
 export class NavBarComponent implements OnInit, OnDestroy {
-  private auth = inject(Auth);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private userService = inject(UserService);
   active: number = 1;
   loggedIn: boolean = false;
   userSubscription: any;
   querySub: any;
   redirectUrl = { redirectUrl: '/' }
+  displayName?: string;
 
   ngOnInit(): void {
     this.querySub = this.route.queryParams.subscribe(params => {
@@ -31,11 +34,11 @@ export class NavBarComponent implements OnInit, OnDestroy {
         this.redirectUrl = { redirectUrl: '/' };
       }
     });
-    this.userSubscription = authState(this.auth).pipe(
-        traceUntilFirst('auth'),
-        map(u => !!u)
-      ).subscribe((isLoggedIn: boolean) => {
-        this.loggedIn = isLoggedIn;
+    this.userSubscription = this.userService.checkAuth().subscribe((user: any) => {
+        this.loggedIn = !!user;
+        if (!!user?.uid) {
+          this.getUserData(user?.uid);
+        }
     });
   }
 
@@ -47,14 +50,18 @@ export class NavBarComponent implements OnInit, OnDestroy {
     this.active = index;
   }
 
-  login() {
-    this.router.navigate(['/login'], { queryParams: this.redirectUrl });
+  getUserData(uid: string) {
+    this.userService.getUser(uid).subscribe((user: any) => {
+      if (user) {
+        this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();      
+      }
+    });
   }
 
   logout() {
-    this.auth.signOut();
-    this.auth.updateCurrentUser(null);
+    this.userService.signUserOut();
     this.loggedIn = false;
     this.router.navigate(['/']);
+    this.active = 1;
   }
 }
