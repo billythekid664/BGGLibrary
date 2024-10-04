@@ -26,7 +26,7 @@ img {
     height: 70px;
 }
 
-@media (max-width: 768px) { 
+@media (max-width: 768px) {
     img {
         height: 48px;
     }
@@ -44,7 +44,7 @@ img {
     }
 }
 
-@media (min-width: 768px) { 
+@media (min-width: 768px) {
     #select-container {
         margin-left: auto;
     }

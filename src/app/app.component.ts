@@ -25,10 +25,11 @@ export class AppComponent implements OnInit, OnDestroy {
           this.isHideNav = value;
           this.cdr.detectChanges();
         });
+    ;
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-  
+
 }

@@ -1,6 +1,6 @@
 <div class="parent-container table-responsive">
     <form>
-      <div class="mb-3 row">
+      <div class="d-flex mb-3 row">
         <label for="table-complete-search" class="col-xs-3 col-sm-auto col-form-label">Game search:</label>
         <div class="col-xs-3 col-sm-auto">
           <input
@@ -13,7 +13,7 @@
         </div>
         <!-- <span *ngIf="loading" class="col col-form-label">Loading...</span> -->
       </div>
-  
+
       <div class="table-responsive">
         <table class="table table-sm table-striped table-hover">
             <thead>
@@ -22,12 +22,13 @@
                 <th scope="col" sortable="last_checkout_date" (sort)="onSort($event)">Availability</th>
                 <th scope="col">Player Count</th>
                 <th scope="col">Play Time</th>
+                <th scope="col">Location</th>
                 <th scope="col"></th>
               </tr>
             </thead>
             <tbody class="align-middle">
                 @if (loading) {
-                    <td colspan="4">
+                    <td colspan="6">
                         <div class="single-item-container">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -61,48 +62,46 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="fs-3 flex-container selectable ms-2 me-2" (click)="addToAccount(item)">
-                                    <i class="bi bi-plus-circle-fill text-primary"></i>
-                                </div>
+                              <div>
+                                {{ item.custom_fields.Location }}
+                              </div>
+                            </td>
+                            <td>
+                              <div class="d-flex align-items-center justify-content-center">
+                                @if (buttonLoading.get(i)) {
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                }
+                                @else {
+                                    <button class="btn btn-primary" [attr.disabled]="!userSignedIn ? '' : undefined" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal" (click)="openModal(item, i)">
+                                        <i class="bi bi-plus-circle"></i>
+                                    </button>
+                                }
+                              </div>
                             </td>
                         </tr>
-                        <!-- <div ngbAccordion *ngIf="accordionItem === 'accordion-' + i">
-                            <div ngbAccordionItem [collapsed]="false">
-                                <div ngbAccordionCollapse>
-                                    <div ngbAccordionBody>
-                                        <ng-template>
-                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon
-                                            officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf
-                                            moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim
-                                            keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur
-                                            butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably
-                                            haven't heard of them accusamus labore sustainable VHS.
-                                        </ng-template>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
                     </ng-container>
                 }
                 @else {
                     <tr>
-                        <td colspan="4" >
+                        <td colspan="6" >
                             <div class="single-item-container">
                                 <p>No Games found</p>
                             </div>
-                            
+
                         </td>
                     </tr>
                 }
             </tbody>
           </table>
       </div>
-  
+
       <div class="d-flex flex-wrap align-items-center align-content-between justify-content-between p-2 mb-3" >
         <div id="pagination-container" class="pt-2">
             <ngb-pagination [collectionSize]="paging.total_items" [(page)]="pageNumber" [maxSize]="3" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize"></ngb-pagination>
         </div>
-        
+
         <div id="select-container" class="pt-2">
             <select style="width: fit-content;" class="form-select" name="pageSize" [(ngModel)]="pageSize">
                 <option [ngValue]="10">10 items per page</option>
@@ -111,12 +110,42 @@
                 <option [ngValue]="100">100 items per page</option>
             </select>
         </div>
-        
+
       </div>
   </form>
   <pre>Items length: {{ items.length }}</pre>
   <pre>Page number: {{ pageNumber }}</pre>
   <pre>Page size: {{ pageSize }}</pre>
   <pre>Search text: {{ searchTerm }}</pre>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="confirmModalLabel">Add {{currentGame?.game?.name}}</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="listForm">
+          <select class="form-select" aria-label="Select Game List" formControlName="selectValue">
+            <option value="" selected>Choose a Game List</option>
+            <option value="List">List</option>
+              @for (gameList of getUserGameLists(); track gameList.id) {
+                <option [value]="gameList.id">{{ gameList.name }}</option>
+              }
+          </select>
+          <div class="form-floating mb-2 mt-4">
+            <input type="text" id="createNewList" class="form-control" placeholder="" formControlName="newListName">
+            <label for="createNewList">Create New Game List</label>
+          </div>
+        </form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="addGameToList()">Save changes</button>
+      </div>
+    </div>
   </div>
-  
+</div>

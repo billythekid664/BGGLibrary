@@ -1,25 +1,43 @@
 import { inject, Injectable } from '@angular/core';
 import { User } from '../model/user.model';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { traceUntilFirst } from '@angular/fire/performance';
 import { Auth, authState, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut, UserCredential } from '@angular/fire/auth';
 import { FirestoreService } from './firestore.service';
+import { arrayUnion } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private auth = inject(Auth);
-  private firestoreService = inject(FirestoreService);
+  private firestore = inject(FirestoreService);
+  private user!: User;
+  private DB = {
+    USERS: 'users',
+    GAME_LIST: 'gameList'
+  }
 
   constructor() { }
 
-  addUser(user: User) {
-    this.firestoreService.setDocData(user, 'users', user.uid);
+  addUser(user: User): Promise<string> {
+    return this.firestore.setDocData(user, this.DB.USERS, user.uid);
   }
 
-  getUser(uid: string): Observable<User> {
-    return this.firestoreService.getDocData('users', uid);
+  fetchUser(uid: string): Observable<User> {
+    return this.firestore.getDocData(this.DB.USERS, uid).pipe(
+      tap(user => {
+        this.user = user;
+      })
+    );
+  }
+
+  createUser(email: string, password: string): Promise<UserCredential> {
+    return createUserWithEmailAndPassword(this.auth, email, password);
+  }
+
+  getCurrentUserData(): User {
+    return this.user;
   }
 
   checkAuth(): Observable<any> {
@@ -40,12 +58,8 @@ export class UserService {
     return signInWithPopup(this.auth, provider);
   }
 
-  createUser(email: string, password: string): Promise<UserCredential> {
-    return createUserWithEmailAndPassword(this.auth, email, password);
-  }
-
-  signUserOut() {
-    signOut(this.auth).then(() => {
+  signUserOut(): Promise<void> {
+    return signOut(this.auth).then(() => {
       console.log('User signed out');
     }, err => console.error('error signing out', err));
   }
