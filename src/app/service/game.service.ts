@@ -53,7 +53,7 @@ export class GameService {
     //     return gameListId;
     //   });
     // });
-    return this.firestore.updateDocCollectionData(this.DB.USERS, this.userService.getCurrentUserData().uid, 'gameLists', gameListId, {
+    return this.firestore.updateSubDocData(this.DB.USERS, this.userService.getCurrentUserData().uid, 'gameLists', gameListId, {
       id: gameListId,
       name: gameListName
     });
