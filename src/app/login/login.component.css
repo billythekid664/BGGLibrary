@@ -15,3 +15,24 @@
 .grey-color {
     color: #888;
 }
+
+.login-container {
+  display: flex;
+  height: calc(100vh - 56px);
+}
+
+@media (max-width: 449px) {
+  .login-card {
+    margin: auto .5rem !important;
+    width: 100%;
+  }
+}
+
+@media (min-width: 450px) {
+  .login-card {
+    /* margin-left: auto !important;
+    margin-right: auto !important; */
+    margin: auto !important;
+    width: 450px;
+  }
+}

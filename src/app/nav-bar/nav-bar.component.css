@@ -26,7 +26,3 @@
         padding-left: var(--bs-navbar-nav-link-padding-x);
     }
 }
-
-.text-stroke {
-    text-stroke: 2px red;
-}

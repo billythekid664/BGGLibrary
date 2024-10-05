@@ -9,6 +9,7 @@ export interface BggItem {
   _options: Options
   is_play_to_win: number
   bgg_id: number
+  bgg_icon_uri: string
   date_updated: string
   max_players: number
   view_uri: string

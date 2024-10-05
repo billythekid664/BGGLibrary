@@ -31,7 +31,7 @@ th[sortable]:before {
     height: 22px;
     float: left;
     margin-left: -10px;
-    margin-right: 4px;    
+    margin-right: 4px;
 }
 
 th[sortable].desc:before {
@@ -52,5 +52,11 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    min-width: 300px;
 }
+
+app-root {
+  margin-top: 56px;
+}
+
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

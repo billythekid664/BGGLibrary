@@ -51,9 +51,9 @@ export class NavBarComponent implements OnInit, OnDestroy {
   }
 
   getUserData(uid: string) {
-    this.userService.getUser(uid).subscribe((user: any) => {
+    this.userService.fetchUser(uid).subscribe((user: any) => {
       if (user) {
-        this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();      
+        this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();
       }
     });
   }

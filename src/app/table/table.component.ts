@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { NgbdSortableHeader } from '../directive/ngbd-sortable-header.directive';
 import { BggService } from '../service/bgg.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -7,6 +7,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import 'moment-timezone';
 import moment from 'moment';
 import { BggItem } from '../model/bgg.model';
+import { UserService } from '../service/user.service';
+import { GameService } from '../service/game.service';
+import { User } from '../model/user.model';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-table',
@@ -15,28 +19,52 @@ import { BggItem } from '../model/bgg.model';
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
-export class TableComponent implements AfterViewInit {
+export class TableComponent implements OnInit, AfterViewInit {
+  private bggService = inject(BggService);
+  private userService = inject(UserService);
+  private gameService = inject(GameService);
+
   @ViewChildren(NgbdSortableHeader) headers!: QueryList<NgbdSortableHeader>;
 
   bggData: any = {};
 
-  items: any[] = [];
+  items: BggItem[] = [];
   paging: any = {};
 
   loading: boolean = false;
+  buttonLoading: Map<number, boolean> = new Map();
+  userSignedIn: boolean = false;
+
   _searchTerm: string = '';
   _pageSize: number = 10;
   _pageNumber: number = 1;
   sortColumn: any;
   sortDirection: any;
   accordionItem: string = '';
-
   debounceTimer: any;
 
-  constructor(private bggService: BggService) {}
+  selectListValue: string = '';
+  newListName: string = '';
+  userGameLists?: any[];
+  currentGameList?: any[] = [];
+
+  constructor() {}
+
+  ngOnInit(): void {
+    this.userService.checkAuth().subscribe((user: any) => {
+      if (user) {
+        this.userSignedIn = true;
+        firstValueFrom(this.userService.fetchUser(user.uid)).then((user: User) => {
+          this.getUserGameLists();
+          this.selectListValue = user?.gameList?.[0].id || '';
+          this.onSelected();
+        });
+      }
+    });
+  }
 
   ngAfterViewInit() {
-    setTimeout(() => { 
+    setTimeout(() => {
       let nameHeader = this.headers.find(h => h.sortable === "name");
       if (!nameHeader) return;
       nameHeader.sort.emit({ column: "name", direction: "asc" });
@@ -93,8 +121,58 @@ export class TableComponent implements AfterViewInit {
     }
   }
 
-  addToAccount(item: BggItem) {
-    console.log('select item: ', item);
+  addGameToList(index: number, game: BggItem) {
+    this.buttonLoading.set(index, true);
+    this.gameService.addGameToList(this.selectListValue, {
+      bgg_id: game?.bgg_id,
+      name: game?.name,
+      photo: game?.bgg_icon_uri,
+      id: game?.id
+    }).then((id: string) => {
+      setTimeout(() => { 
+        this.buttonLoading.delete(index);
+      }, 200);
+    });
+  }
+
+  removeGameFromList(index: number, game: BggItem) {
+    this.buttonLoading.set(index, true);
+    this.gameService.removeGamefromList(this.selectListValue, {
+      bgg_id: game?.bgg_id,
+      name: game?.name,
+      photo: game?.bgg_icon_uri,
+      id: game?.id
+    }).then(() => {
+      setTimeout(() => {
+        this.buttonLoading.delete(index);
+      }, 200);
+    });
+  }
+
+  createNewList() {
+    this.gameService.createGameList(this.newListName).then((id: string) => {
+      this.getUserGameLists();
+      this.selectListValue = id;
+      this.newListName = '';
+    });
+  }
+
+  getUserGameLists() {
+    this.userGameLists = this.userService.getCurrentUserData()?.gameList;
+  }
+
+  checkIfUserGameListEmptyOrNull() {
+    return !this.userGameLists || (this.userGameLists?.length || 0) < 1;
+  }
+
+  onSelected() {
+    this.gameService.fetchGameList(this.selectListValue).subscribe(data => {
+      this.currentGameList = data.gameList;
+    });
+  }
+
+  gameExistsInList(bggGame: BggItem) {
+    return this.currentGameList?.some(game => game.id === bggGame.id);
   }
 
   get pageNumber() {
