@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { NgbdSortableHeader } from '../directive/ngbd-sortable-header.directive';
 import { BggService } from '../service/bgg.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -55,7 +55,6 @@ export class TableComponent implements OnInit, AfterViewInit {
       if (user) {
         this.userSignedIn = true;
         firstValueFrom(this.userService.fetchUser(user.uid)).then((user: User) => {
-          this.getUserGameLists();
           this.selectListValue = user?.gameList?.[0].id || '';
           this.onSelected();
         });
@@ -129,7 +128,7 @@ export class TableComponent implements OnInit, AfterViewInit {
       photo: game?.bgg_icon_uri,
       id: game?.id
     }).then((id: string) => {
-      setTimeout(() => { 
+      setTimeout(() => {
         this.buttonLoading.delete(index);
       }, 200);
     });
@@ -151,9 +150,9 @@ export class TableComponent implements OnInit, AfterViewInit {
 
   createNewList() {
     this.gameService.createGameList(this.newListName).then((id: string) => {
-      this.getUserGameLists();
       this.selectListValue = id;
       this.newListName = '';
+      this.onSelected();
     });
   }
 
@@ -168,11 +167,29 @@ export class TableComponent implements OnInit, AfterViewInit {
   onSelected() {
     this.gameService.fetchGameList(this.selectListValue).subscribe(data => {
       this.currentGameList = data.gameList;
+      this.getUserGameLists();
     });
   }
 
   gameExistsInList(bggGame: BggItem) {
     return this.currentGameList?.some(game => game.id === bggGame.id);
+  }
+
+  getColSpan(): number {
+    return Array.from(document?.getElementById('headerRow')?.children!).filter(el => {
+      return getComputedStyle(el).display !== 'none';
+    }).length;
+  }
+
+  getRowSpan(): number {
+    return this.getColSpan() <= 3 ? 2 : 1;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    document.querySelectorAll('.dynamic-rowspan').forEach(el => {
+      el.setAttribute('rowspan', this.getRowSpan().toString());
+    });
   }
 
   get pageNumber() {

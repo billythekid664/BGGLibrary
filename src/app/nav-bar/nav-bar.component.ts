@@ -38,6 +38,9 @@ export class NavBarComponent implements OnInit, OnDestroy {
         this.loggedIn = !!user;
         if (!!user?.uid) {
           this.getUserData(user?.uid);
+          if (![1,2,3].includes(this.active)) {
+            this.setActive(1);
+          }
         }
     });
   }
@@ -49,6 +52,12 @@ export class NavBarComponent implements OnInit, OnDestroy {
   setActive(index: number): void {
     this.active = index;
   }
+
+  handleNavClick(index: number): void {
+    this.setActive(index);
+    document.getElementById('navToggleButton')?.click();
+  }
+
 
   getUserData(uid: string) {
     this.userService.fetchUser(uid).subscribe((user: any) => {
