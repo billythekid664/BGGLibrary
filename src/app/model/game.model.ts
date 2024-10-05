@@ -1,5 +1,5 @@
 export interface Game {
-  bgg_id?: string
+  bgg_id?: number
   name?: string
   photo?: string
   id?: string

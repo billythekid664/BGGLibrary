@@ -26,6 +26,10 @@ img {
     height: 70px;
 }
 
+.rounded {
+    border-radius: 50% !important;
+}
+
 @media (max-width: 768px) {
     img {
         height: 48px;

@@ -1,118 +1,130 @@
 <div class="parent-container table-responsive">
-    <form>
-      <div class="d-flex mb-3 row">
-        <label for="table-complete-search" class="col-xs-3 col-sm-auto col-form-label">Game search:</label>
-        <div class="col-xs-3 col-sm-auto">
-          <input
-            id="table-complete-search"
-            type="text"
-            class="form-control"
-            name="searchTerm"
-            [(ngModel)]="searchTerm"
-          />
-        </div>
-        <!-- <span *ngIf="loading" class="col col-form-label">Loading...</span> -->
+  <div>
+    <div class="d-flex mb-3 align-items-center justify-content-around flex-wrap">
+      <div class="form-floating">
+        <input id="table-complete-search" type="text" class="form-control" placeholder="Game Search" name="searchTerm" [(ngModel)]="searchTerm"/>
+        <label for="table-complete-search">Game Search</label>
       </div>
+      <div class="d-flex align-items-center flex-wrap" style="gap: 6px; ">
+        <div class="form-floating mb-2 mt-2" style="min-width: 200px;">
+          <select id="gameListSelect" class="form-select" aria-label="Select Game List" placeholder="" [disabled]="checkIfUserGameListEmptyOrNull()" (change)="onSelected()" [(ngModel)]="selectListValue">
+            @for (gameList of userGameLists; track gameList.id;) {
+              <option [value]="gameList.id">{{ gameList.name }}</option>
+            }
+          </select>
+          <label for="gameListSelect">Game List</label>
+        </div>
+        <div>
+          <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
+        </div>
+      </div>
+      
+      
+    </div>
 
-      <div class="table-responsive">
-        <table class="table table-sm table-striped table-hover">
-            <thead>
-              <tr>
-                <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
-                <th scope="col" sortable="last_checkout_date" (sort)="onSort($event)">Availability</th>
-                <th scope="col">Player Count</th>
-                <th scope="col">Play Time</th>
-                <th scope="col">Location</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody class="align-middle">
-                @if (loading) {
-                    <td colspan="6">
-                        <div class="single-item-container">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    </td>
-                }
-                @else if (items && items.length > 0) {
-                    <ng-container *ngFor="let item of items; let i = index">
-                        <tr>
-                            <td>
-                                <div class="flex-container" style="min-width: 200px">
-                                    <img class="img-thumbnail img-fluid" alt="Game Icon" [attr.src]="item.bgg_icon_uri">
-                                    <a target="_blank" href="https://boardgamegeek.com/boardgame/{{item.bgg_id}}"><ngb-highlight [result]="item.name.normalize('NFC')" [term]="searchTerm" /></a>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="flex-container" style="min-width: 100px">
-                                    <ng-container *ngIf="item.is_checked_out === 0; else checkedOut">Available</ng-container>
-                                    <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(item.last_checkout_date) }}</ng-template>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="flex-container">
-                                    {{ item.min_players }} <ng-container *ngIf="item.max_players !== item.min_players">- {{ item.max_players }}</ng-container>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="flex-container">
-                                    {{ item.min_play_time }} <ng-container *ngIf="item.max_play_time !== item.min_play_time">- {{ item.max_play_time }}</ng-container> minutes
-                                </div>
-                            </td>
-                            <td>
-                              <div>
-                                {{ item.custom_fields.Location }}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover">
+          <thead>
+            <tr>
+              <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
+              <th scope="col" sortable="last_checkout_date" (sort)="onSort($event)">Availability</th>
+              <th scope="col">Player Count</th>
+              <th scope="col">Play Time</th>
+              <th scope="col">Location</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody class="align-middle">
+              @if (loading) {
+                  <td colspan="6">
+                      <div class="single-item-container">
+                          <div class="spinner-border text-primary" role="status">
+                              <span class="visually-hidden">Loading...</span>
+                          </div>
+                      </div>
+                  </td>
+              }
+              @else if (items && items.length > 0) {
+                  <ng-container *ngFor="let item of items; let i = index">
+                      <tr>
+                          <td>
+                              <div class="flex-container" style="min-width: 200px">
+                                  <img class="img-thumbnail img-fluid" alt="Game Icon" [attr.src]="item.bgg_icon_uri">
+                                  <a target="_blank" href="https://boardgamegeek.com/boardgame/{{item.bgg_id}}"><ngb-highlight [result]="item.name.normalize('NFC')" [term]="searchTerm" /></a>
                               </div>
-                            </td>
-                            <td>
-                              <div class="d-flex align-items-center justify-content-center">
-                                @if (buttonLoading.get(i)) {
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                }
-                                @else {
-                                    <button class="btn btn-primary" [attr.disabled]="!userSignedIn ? '' : undefined" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal" (click)="openModal(item, i)">
-                                        <i class="bi bi-plus-circle"></i>
-                                    </button>
-                                }
+                          </td>
+                          <td>
+                              <div class="flex-container" style="min-width: 100px">
+                                  <ng-container *ngIf="item.is_checked_out === 0; else checkedOut">Available</ng-container>
+                                  <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(item.last_checkout_date) }}</ng-template>
                               </div>
-                            </td>
-                        </tr>
-                    </ng-container>
-                }
-                @else {
-                    <tr>
-                        <td colspan="6" >
-                            <div class="single-item-container">
-                                <p>No Games found</p>
+                          </td>
+                          <td>
+                              <div class="flex-container">
+                                  {{ item.min_players }} <ng-container *ngIf="item.max_players !== item.min_players">- {{ item.max_players }}</ng-container>
+                              </div>
+                          </td>
+                          <td>
+                              <div class="flex-container">
+                                  {{ item.min_play_time }} <ng-container *ngIf="item.max_play_time !== item.min_play_time">- {{ item.max_play_time }}</ng-container> minutes
+                              </div>
+                          </td>
+                          <td>
+                            <div>
+                              {{ item.custom_fields.Location }}
                             </div>
+                          </td>
+                          <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                              @if (buttonLoading.get(i)) {
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                              }
+                              @else if (userSignedIn && gameExistsInList(item)) {
+                                <button class="btn btn-danger rounded" (click)="removeGameFromList(i, item)"> 
+                                  <i class="bi bi-dash-lg"></i>
+                                </button>
+                              }
+                              @else {
+                                <button class="btn btn-primary rounded" [disabled]="checkIfUserGameListEmptyOrNull() || !userSignedIn" (click)="addGameToList(i, item)">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                              }
+                            </div>
+                          </td>
+                      </tr>
+                  </ng-container>
+              }
+              @else {
+                  <tr>
+                      <td colspan="6" >
+                          <div class="single-item-container">
+                              <p>No Games found</p>
+                          </div>
 
-                        </td>
-                    </tr>
-                }
-            </tbody>
-          </table>
+                      </td>
+                  </tr>
+              }
+          </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center align-content-between justify-content-between p-2 mb-3" >
+      <div id="pagination-container" class="pt-2">
+          <ngb-pagination [collectionSize]="paging.total_items" [(page)]="pageNumber" [maxSize]="3" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize"></ngb-pagination>
       </div>
 
-      <div class="d-flex flex-wrap align-items-center align-content-between justify-content-between p-2 mb-3" >
-        <div id="pagination-container" class="pt-2">
-            <ngb-pagination [collectionSize]="paging.total_items" [(page)]="pageNumber" [maxSize]="3" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize"></ngb-pagination>
-        </div>
-
-        <div id="select-container" class="pt-2">
-            <select style="width: fit-content;" class="form-select" name="pageSize" [(ngModel)]="pageSize">
-                <option [ngValue]="10">10 items per page</option>
-                <option [ngValue]="25">25 items per page</option>
-                <option [ngValue]="50">50 items per page</option>
-                <option [ngValue]="100">100 items per page</option>
-            </select>
-        </div>
-
+      <div id="select-container" class="pt-2">
+          <select style="width: fit-content;" class="form-select" name="pageSize" [(ngModel)]="pageSize">
+              <option [ngValue]="10">10 items per page</option>
+              <option [ngValue]="25">25 items per page</option>
+              <option [ngValue]="50">50 items per page</option>
+              <option [ngValue]="100">100 items per page</option>
+          </select>
       </div>
-  </form>
+    </div>
+  </div>
   <pre>Items length: {{ items.length }}</pre>
   <pre>Page number: {{ pageNumber }}</pre>
   <pre>Page size: {{ pageSize }}</pre>
@@ -123,28 +135,18 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="confirmModalLabel">Add {{currentGame?.game?.name}}</h1>
+        <h1 class="modal-title fs-5" id="confirmModalLabel">Create List</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form [formGroup]="listForm">
-          <select class="form-select" aria-label="Select Game List" formControlName="selectValue">
-            <option value="" selected>Choose a Game List</option>
-            <option value="List">List</option>
-              @for (gameList of getUserGameLists(); track gameList.id) {
-                <option [value]="gameList.id">{{ gameList.name }}</option>
-              }
-          </select>
           <div class="form-floating mb-2 mt-4">
-            <input type="text" id="createNewList" class="form-control" placeholder="" formControlName="newListName">
+            <input type="text" id="createNewList" class="form-control" placeholder="" [(ngModel)]="newListName">
             <label for="createNewList">Create New Game List</label>
           </div>
-        </form>
-
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="addGameToList()">Save changes</button>
+        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="createNewList()" [disabled]="newListName === ''">Save changes</button>
       </div>
     </div>
   </div>

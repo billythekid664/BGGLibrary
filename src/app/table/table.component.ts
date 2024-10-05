@@ -2,14 +2,15 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { NgbdSortableHeader } from '../directive/ngbd-sortable-header.directive';
 import { BggService } from '../service/bgg.service';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import 'moment-timezone';
 import moment from 'moment';
 import { BggItem } from '../model/bgg.model';
 import { UserService } from '../service/user.service';
-import { FirestoreService } from '../service/firestore.service';
 import { GameService } from '../service/game.service';
+import { User } from '../model/user.model';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-table',
@@ -22,7 +23,6 @@ export class TableComponent implements OnInit, AfterViewInit {
   private bggService = inject(BggService);
   private userService = inject(UserService);
   private gameService = inject(GameService);
-  private fb = inject(FormBuilder);
 
   @ViewChildren(NgbdSortableHeader) headers!: QueryList<NgbdSortableHeader>;
 
@@ -30,35 +30,23 @@ export class TableComponent implements OnInit, AfterViewInit {
 
   items: BggItem[] = [];
   paging: any = {};
-  currentGame: any = {};
 
   loading: boolean = false;
   buttonLoading: Map<number, boolean> = new Map();
   userSignedIn: boolean = false;
+
   _searchTerm: string = '';
   _pageSize: number = 10;
   _pageNumber: number = 1;
   sortColumn: any;
   sortDirection: any;
   accordionItem: string = '';
-
-  formGroupXORValidator(controlNames: string[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const controls = controlNames.map(name => control.get(name));
-
-      const filledControls = controls.filter(c => c?.value);
-
-      if (filledControls.length === 1) {
-        return null; // Valid - only one control is filled
-      } else {
-        return { exclusiveOr: true }; // Invalid - either none or more than one control is filled
-      }
-    };
-  }
-
-  listForm!: FormGroup;
-
   debounceTimer: any;
+
+  selectListValue: string = '';
+  newListName: string = '';
+  userGameLists?: any[];
+  currentGameList?: any[] = [];
 
   constructor() {}
 
@@ -66,13 +54,13 @@ export class TableComponent implements OnInit, AfterViewInit {
     this.userService.checkAuth().subscribe((user: any) => {
       if (user) {
         this.userSignedIn = true;
+        firstValueFrom(this.userService.fetchUser(user.uid)).then((user: User) => {
+          this.getUserGameLists();
+          this.selectListValue = user?.gameList?.[0].id || '';
+          this.onSelected();
+        });
       }
     });
-
-    this.listForm = this.fb.group({
-      selectValue: [''],
-      newListName: [''],
-    }, { validators: this.formGroupXORValidator(['selectValue', 'newListName']) });
   }
 
   ngAfterViewInit() {
@@ -133,33 +121,58 @@ export class TableComponent implements OnInit, AfterViewInit {
     }
   }
 
-  openModal(item: BggItem, index: number) {
-    console.log('select item: ', item);
-    console.log('user: ', this.userService.getCurrentUserData());
-    this.listForm.reset();
-    this.currentGame = {
-      game: item,
-      index: index
-    };
+  addGameToList(index: number, game: BggItem) {
+    this.buttonLoading.set(index, true);
+    this.gameService.addGameToList(this.selectListValue, {
+      bgg_id: game?.bgg_id,
+      name: game?.name,
+      photo: game?.bgg_icon_uri,
+      id: game?.id
+    }).then((id: string) => {
+      setTimeout(() => { 
+        this.buttonLoading.delete(index);
+      }, 200);
+    });
   }
 
-  addGameToList() {
-    console.log('selectValue: ', this.listForm);
-    // this.buttonLoading.set(index, true);
-    // this.firestore.setDocData({
-    //   name: 'test',
-    //   gameList: [{
-    //     bgg_id: item.bgg_id,
-    //     name: item.name,
-    //     photo: item.bgg_icon_uri,
-    //     id: item.id
-    // }]}, 'dataList').then((id) => {
-    //   console.log('Document written with ID: ', id);
-    // });
+  removeGameFromList(index: number, game: BggItem) {
+    this.buttonLoading.set(index, true);
+    this.gameService.removeGamefromList(this.selectListValue, {
+      bgg_id: game?.bgg_id,
+      name: game?.name,
+      photo: game?.bgg_icon_uri,
+      id: game?.id
+    }).then(() => {
+      setTimeout(() => {
+        this.buttonLoading.delete(index);
+      }, 200);
+    });
+  }
+
+  createNewList() {
+    this.gameService.createGameList(this.newListName).then((id: string) => {
+      this.getUserGameLists();
+      this.selectListValue = id;
+      this.newListName = '';
+    });
   }
 
   getUserGameLists() {
-    return this.userService.getCurrentUserData()?.gameList
+    this.userGameLists = this.userService.getCurrentUserData()?.gameList;
+  }
+
+  checkIfUserGameListEmptyOrNull() {
+    return !this.userGameLists || (this.userGameLists?.length || 0) < 1;
+  }
+
+  onSelected() {
+    this.gameService.fetchGameList(this.selectListValue).subscribe(data => {
+      this.currentGameList = data.gameList;
+    });
+  }
+
+  gameExistsInList(bggGame: BggItem) {
+    return this.currentGameList?.some(game => game.id === bggGame.id);
   }
 
   get pageNumber() {
