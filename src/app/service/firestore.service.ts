@@ -35,4 +35,12 @@ export class FirestoreService {
       return ref.id;
     });
   }
+
+  updateSubDocData(collectionId: string, docId: string, subCollectionId: string, subDocId: string, data: any) {
+    let docRef = doc(this.firestore, collectionId, docId);
+    let subDocRef = doc(docRef, subCollectionId, subDocId);
+    return setDoc(subDocRef, data).then(() => {
+      return subDocId;
+    });
+  }
 }

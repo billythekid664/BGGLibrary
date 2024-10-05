@@ -43,15 +43,19 @@ export class GameService {
   }
 
   updateUserGameList(gameListId: string, gameListName: string): Promise<string> {
-    return this.firestore.updateDocData({
-      gameList: arrayUnion({
-        id: gameListId,
-        name: gameListName
-      })
-    }, this.DB.USERS, this.userService.getCurrentUserData().uid).then(id => {
-      return firstValueFrom(this.userService.fetchUser(this.userService.getCurrentUserData().uid)).then((user: any) => {
-        return gameListId;
-      });
+    // return this.firestore.updateDocData({
+    //   gameList: arrayUnion({
+    //     id: gameListId,
+    //     name: gameListName
+    //   })
+    // }, this.DB.USERS, this.userService.getCurrentUserData().uid).then(id => {
+    //   return firstValueFrom(this.userService.fetchUser(this.userService.getCurrentUserData().uid)).then((user: any) => {
+    //     return gameListId;
+    //   });
+    // });
+    return this.firestore.updateDocCollectionData(this.DB.USERS, this.userService.getCurrentUserData().uid, 'gameLists', gameListId, {
+      id: gameListId,
+      name: gameListName
     });
   }
 
