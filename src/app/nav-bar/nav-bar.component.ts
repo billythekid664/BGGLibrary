@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Auth, authState, signOut, user } from '@angular/fire/auth';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { traceUntilFirst } from '@angular/fire/performance';
@@ -16,7 +16,7 @@ import { ActiveService } from '../service/active.service';
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.css'
 })
-export class NavBarComponent implements OnInit, OnDestroy {
+export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private userService = inject(UserService);
@@ -29,9 +29,6 @@ export class NavBarComponent implements OnInit, OnDestroy {
   displayName?: string;
 
   ngOnInit(): void {
-    this.activeService.checkActive().subscribe((active: number) => {
-      this.active = active;
-    });
     this.querySub = this.route.queryParams.subscribe(params => {
       if (params['redirectUrl']) {
         this.redirectUrl = { redirectUrl: decodeURIComponent(params['redirectUrl'])};
@@ -47,6 +44,12 @@ export class NavBarComponent implements OnInit, OnDestroy {
             this.activeService.setActive(1);
           }
         }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.activeService.checkActive().subscribe((active: number) => {
+      this.active = active;
     });
   }
 
