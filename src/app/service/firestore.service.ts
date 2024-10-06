@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { addDoc, arrayUnion, collection, collectionData, collectionGroup, doc, docData, Firestore, getDocs, limitToLast, orderBy, query, QueryFieldFilterConstraint, setDoc, updateDoc, where } from '@angular/fire/firestore';
-import { exhaustAll, lastValueFrom, mergeAll, Observable, takeLast, tap } from 'rxjs';
+import { debounceTime, exhaustAll, lastValueFrom, mergeAll, Observable, takeLast, tap, firstValueFrom } from 'rxjs';
 import { UserGamelistRef } from '../model/user-gamelist-ref.model';
 
 @Injectable({
@@ -47,8 +47,8 @@ export class FirestoreService {
 
   querySubCollectionData(groupName: string, groupQuery: QueryFieldFilterConstraint): Promise<any> {
     let collectionGroupRef = collectionGroup(this.firestore, groupName);
-    return getDocs(query(collectionGroupRef, groupQuery, orderBy('id', 'asc'), limitToLast(1))).then(snapshot => {
-       snapshot
-    });
+    return firstValueFrom(collectionData(query(collectionGroupRef, groupQuery)).pipe(
+      debounceTime(200),
+    ));
   }
 }
