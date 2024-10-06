@@ -1,1 +1,216 @@
-<p>user works!</p>
+<div class="parent-container table-responsive">
+    <div class="d-flex justify-content-center" *ngIf="showShareAlert">
+        <div class="alert alert-success d-flex align-items-center" role="alert" style="gap: 6px">
+            <i class="bi bi-check-circle-fill"></i>
+            <div>
+            Game list was successfully shared
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="d-flex mb-4 align-items-center justify-content-around flex-wrap" style="gap: 6px">
+          <div class="form-floating">
+            <input id="table-complete-search" type="text" class="form-control" placeholder="Game Search" name="searchTerm" [(ngModel)]="searchTerm"/>
+            <label for="table-complete-search">Game Search</label>
+          </div>
+          <div>
+            <div class="input-group">
+              <div class="form-floating" style="min-width: 200px;">
+                <select id="gameListSelect" class="form-select" aria-label="Select Game List" placeholder="" [disabled]="checkIfUserGameListEmptyOrNull() || !userSignedIn" (change)="onSelected()" [(ngModel)]="selectListValue">
+                  @for (gameList of userGameLists; track gameList.id;) {
+                    <option [value]="gameList.id">{{ gameList.name }}</option>
+                  }
+                </select>
+                <label for="gameListSelect">Game List</label>
+              </div>
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" [disabled]="!userSignedIn"><i class="bi bi-gear-fill"></i></button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
+                <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#shareModal" [disabled]="checkIfUserGameListEmptyOrNull()">Share List</button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" type="button" [disabled]="checkIfUserGameListEmptyOrNull()" (click)="deleteGameListAndReferences()">Delete List</button>
+              </ul>
+            </div>
+          </div>
+        </div>
+    
+        <div class="table-responsive">
+          <table class="table table-sm table-borderless">
+              <thead>
+                <tr id="headerRow">
+                  <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
+                  <th scope="col" sortable="last_checkout_date" (sort)="onSort($event)">Availability</th>
+                  <th scope="col" class="mobile-hide">Player Count</th>
+                  <th scope="col" class="mobile-hide">Play Time</th>
+                  <th scope="col" class="mobile-hide">Location</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody class="align-middle">
+                  @if (loading) {
+                      <td [attr.colspan]="getColSpan()">
+                          <div class="single-item-container">
+                              <div class="spinner-border text-primary" role="status">
+                                  <span class="visually-hidden">Loading...</span>
+                              </div>
+                          </div>
+                      </td>
+                  }
+                  @else if (currentGameList[listIndex()] && currentGameList[listIndex()].length > 0) {
+                      <ng-container *ngFor="let item of currentGameList[listIndex()]; let i = index">
+                          <tr>
+                              <td>
+                                  <div class="flex-container" style="min-width: 200px">
+                                      <img class="img-thumbnail img-fluid" alt="Game Icon" [attr.src]="item?.photo">
+                                      <a target="_blank" href="https://boardgamegeek.com/boardgame/{{item?.bgg_id}}"><ngb-highlight [result]="item?.name?.normalize('NFC')" [term]="searchTerm" /></a>
+                                  </div>
+                              </td>
+                              <td>
+                                    @if(!getBggGameInfo(item)) {
+                                        <div class="placeholder-glow">
+                                            <span class="placeholder col-5"></span>
+                                        </div>
+                                    }
+                                    @else { 
+                                        <div class="flex-container" style="min-width: 100px">
+                                            <ng-container *ngIf="item.is_checked_out === 0; else checkedOut">Available</ng-container>
+                                            <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(getBggGameInfo(item)?.last_checkout_date) }}</ng-template>
+                                        </div> 
+                                    }                                  
+                              </td>
+                              <td class="mobile-hide">
+                                    @if(!getBggGameInfo(item)) {
+                                        <div class="placeholder-glow">
+                                            <span class="placeholder col-5"></span>
+                                        </div>
+                                    }
+                                    @else { 
+                                        <div class="flex-container">
+                                            {{ getBggGameInfo(item)?.min_players }} <ng-container *ngIf="getBggGameInfo(item)?.max_players !== getBggGameInfo(item)?.min_players">- {{ getBggGameInfo(item)?.max_players }}</ng-container>
+                                        </div>
+                                    }
+                              </td>
+                              <td class="mobile-hide">
+                                @if(!getBggGameInfo(item)) {
+                                    <div class="placeholder-glow">
+                                        <span class="placeholder col-5"></span>
+                                    </div>
+                                }
+                                @else { 
+                                  <div class="flex-container">
+                                      {{ getBggGameInfo(item)?.min_play_time }} <ng-container *ngIf="getBggGameInfo(item)?.max_play_time !== getBggGameInfo(item)?.min_play_time">- {{ getBggGameInfo(item)?.max_play_time }}</ng-container> minutes
+                                  </div>
+                                }
+                              </td>
+                              <td class="mobile-hide">
+                                @if(!getBggGameInfo(item)) {
+                                    <div class="placeholder-glow">
+                                        <span class="placeholder col-3"></span>
+                                    </div>
+                                }
+                                @else { 
+                                    <div>
+                                    {{ getBggGameInfo(item)?.custom_fields?.Location }}
+                                    </div>
+                                }
+                              </td>
+                              <td [attr.rowspan]="getRowSpan()" class="dynamic-rowspan">
+                                <div class="d-flex align-items-center justify-content-center">
+                                  @if (buttonLoading.get(i)) {
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                  }
+                                  @else if (userSignedIn && gameExistsInList(item)) {
+                                    <button class="btn btn-danger rounded" (click)="removeGameFromList(i, item)">
+                                      <i class="bi bi-dash-lg"></i>
+                                    </button>
+                                  }
+                                  @else {
+                                    <button class="btn btn-primary rounded" [disabled]="checkIfUserGameListEmptyOrNull() || !userSignedIn" (click)="addGameToList(i, item)">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                  }
+                                </div>
+                              </td>
+                          </tr>
+                          <tr class="table-group-divider-bottom">
+                            <td colspan="2">
+                              <div class="mx-3 d-flex flex-column">
+                                <span class="my-1">Player Count:</span>
+                                <span class="my-1">Play Time:</span>
+                                <span class="my-1">Location:</span>
+                              </div>
+                              <div class="d-flex flex-column">
+                                <span class="my-1">{{ item?.min_players }} <ng-container *ngIf="item?.max_players !== item?.min_players">- {{ item?.max_players }}</ng-container></span>
+                                <span class="my-1">{{ item?.min_play_time }} <ng-container *ngIf="item?.max_play_time !== item?.min_play_time">- {{ item?.max_play_time }}</ng-container> minutes</span>
+                                <span class="my-1">{{ item?.custom_fields?.Location }}</span>
+                              </div>
+                            </td>
+                          </tr>
+                      </ng-container>
+                  }
+                  @else {
+                      <tr>
+                          <td [attr.colspan]="getColSpan()" >
+                              <div class="single-item-container">
+                                  <p>No Games found</p>
+                              </div>
+    
+                          </td>
+                      </tr>
+                  }
+              </tbody>
+            </table>
+        </div>
+    
+        <div class="d-flex flex-wrap align-items-center align-content-between justify-content-between p-2 mb-3" >
+          <div id="pagination-container" class="pt-2">
+              <ngb-pagination [collectionSize]="totalNumItems" [(page)]="pageNumber" [maxSize]="3" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize"></ngb-pagination>
+          </div>
+        </div>
+      </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="confirmModalLabel">Create List</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-floating mb-2 mt-4">
+              <input type="text" id="createNewList" class="form-control" placeholder="" [(ngModel)]="newListName">
+              <label for="createNewList">Create New Game List</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="createNewList()" [disabled]="newListName === ''">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="shareModalLabel">Share List With</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-floating mb-2 mt-4">
+              <input type="text" id="shareList" class="form-control" placeholder="" [(ngModel)]="shareEmail">
+              <label for="shareList">Email</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="shareGameList()" [disabled]="shareEmail === ''">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

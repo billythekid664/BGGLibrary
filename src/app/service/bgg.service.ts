@@ -14,7 +14,8 @@ export interface SearchResult {
 })
 export class BggService {
 
-  url = 'https://tabletop.events/api/library/0AEB11DA-2B7D-11EC-B400-855F800FD618/librarygames';
+  libraryUrl = 'https://tabletop.events/api/library/0AEB11DA-2B7D-11EC-B400-855F800FD618/librarygames';
+  itemUrl = (id: string) => `https://tabletop.events/api/librarygame/${id}`;
 
   constructor(private http: HttpClient) { }
 
@@ -29,6 +30,15 @@ export class BggService {
         .append('is_in_circulation', '1')
         .append('query', query || '');
     console.log('params: ', params)
-    return this.http.get(this.url, {params});
+    return this.http.get(this.libraryUrl, {params});
+  }
+
+  getBggGameInfo(id: string) {
+    const params = new HttpParams()
+        .append('_include_options', '1')
+        .append('_include', 'bgg_icon_uri')
+        .append('_include_related_objects', 'library')
+        .append('_include_relationships', '1');
+    return this.http.get<BggItem>(this.itemUrl(id), {params});
   }
 }
