@@ -37,7 +37,7 @@ export class NavBarComponent implements OnInit, OnDestroy {
     this.userSubscription = this.userService.checkAuth().subscribe((user: any) => {
         this.loggedIn = !!user;
         if (!!user?.uid) {
-          this.getUserData(user?.uid);
+          this.getUserData(user.uid);
           if (![1,2,3].includes(this.active)) {
             this.setActive(1);
           }
@@ -65,6 +65,7 @@ export class NavBarComponent implements OnInit, OnDestroy {
         this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();
       }
     });
+    this.userService.fetchUserGameLists(uid).subscribe((gameLists: any) => {});
   }
 
   logout() {

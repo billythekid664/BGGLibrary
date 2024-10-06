@@ -1,9 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { addDoc, arrayUnion, collection, doc, docData, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { User } from '../model/user.model';
-import { Game } from '../model/game.model';
-import { GameList } from '../model/gamelist.model';
+import { addDoc, arrayUnion, collection, collectionData, collectionGroup, doc, docData, Firestore, getDocs, limitToLast, orderBy, query, QueryFieldFilterConstraint, setDoc, updateDoc, where } from '@angular/fire/firestore';
+import { exhaustAll, lastValueFrom, mergeAll, Observable, takeLast, tap } from 'rxjs';
+import { UserGamelistRef } from '../model/user-gamelist-ref.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +13,10 @@ export class FirestoreService {
 
   getDocData(...pathSegments: string[]): Observable<any> {
     return docData(doc(this.firestore, pathSegments.shift()!, ...pathSegments));
+  }
+
+  getCollectionData(...pathSegments: string[]): Observable<any> {
+    return collectionData(collection(this.firestore, pathSegments.shift()!, ...pathSegments));
   }
 
   setDocData(data: any, ...pathSegments: string[]): Promise<string> {
@@ -36,11 +38,17 @@ export class FirestoreService {
     });
   }
 
-  updateSubDocData(collectionId: string, docId: string, subCollectionId: string, subDocId: string, data: any) {
-    let docRef = doc(this.firestore, collectionId, docId);
-    let subDocRef = doc(docRef, subCollectionId, subDocId);
-    return setDoc(subDocRef, data).then(() => {
-      return subDocId;
+  createSubDocData(data: any, ...pathSegments: string[]) {
+    let docRef = doc(this.firestore, pathSegments.shift()!, ...pathSegments);
+    return setDoc(docRef, data).then(() => {
+      return docRef.id;
+    });
+  }
+
+  querySubCollectionData(groupName: string, groupQuery: QueryFieldFilterConstraint): Promise<any> {
+    let collectionGroupRef = collectionGroup(this.firestore, groupName);
+    return getDocs(query(collectionGroupRef, groupQuery, orderBy('id', 'asc'), limitToLast(1))).then(snapshot => {
+       snapshot
     });
   }
 }

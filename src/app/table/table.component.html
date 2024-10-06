@@ -15,9 +15,10 @@
             </select>
             <label for="gameListSelect">Game List</label>
           </div>
-          <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" [disabled]="checkIfUserGameListEmptyOrNull()"><i class="bi bi-gear-fill"></i></button>
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-gear-fill"></i></button>
           <ul class="dropdown-menu dropdown-menu-end">
             <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
+            <button class="dropdown-item" type="button" (click)="fetchUserGameListCollection()">Fetch List</button>
           </ul>
         </div>
       </div>

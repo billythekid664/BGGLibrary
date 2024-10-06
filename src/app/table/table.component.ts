@@ -11,6 +11,7 @@ import { UserService } from '../service/user.service';
 import { GameService } from '../service/game.service';
 import { User } from '../model/user.model';
 import { firstValueFrom } from 'rxjs';
+import { UserGamelistRef } from '../model/user-gamelist-ref.model';
 
 @Component({
   selector: 'app-table',
@@ -45,7 +46,7 @@ export class TableComponent implements OnInit, AfterViewInit {
 
   selectListValue: string = '';
   newListName: string = '';
-  userGameLists?: any[];
+  userGameLists?: UserGamelistRef[];
   currentGameList?: any[] = [];
 
   constructor() {}
@@ -55,7 +56,9 @@ export class TableComponent implements OnInit, AfterViewInit {
       if (user) {
         this.userSignedIn = true;
         firstValueFrom(this.userService.fetchUser(user.uid)).then((user: User) => {
-          this.selectListValue = user?.gameList?.[0].id || '';
+        });
+        firstValueFrom(this.userService.fetchUserGameLists(user.uid)).then((gameLists: any) => {
+          this.selectListValue = gameLists?.[0]?.id || '';
           this.onSelected();
         });
       }
@@ -157,7 +160,7 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   getUserGameLists() {
-    this.userGameLists = this.userService.getCurrentUserData()?.gameList;
+    this.userGameLists = this.userService.getCurrentUserGameLists();
   }
 
   checkIfUserGameListEmptyOrNull() {
@@ -165,8 +168,11 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   onSelected() {
-    this.gameService.fetchGameList(this.selectListValue).subscribe(data => {
-      this.currentGameList = data.gameList;
+    if (!this.selectListValue) { 
+      return;
+    }
+    this.gameService.fetchGameList(this.selectListValue).then(data => {
+      this.currentGameList = data?.gameList;
       this.getUserGameLists();
     });
   }
@@ -189,6 +195,12 @@ export class TableComponent implements OnInit, AfterViewInit {
   onResize(event: any) {
     document.querySelectorAll('.dynamic-rowspan').forEach(el => {
       el.setAttribute('rowspan', this.getRowSpan().toString());
+    });
+  }
+
+  fetchUserGameListCollection() {
+    this.gameService.fetchUsersWithGameList(this.selectListValue).then(list => {
+      console.log('list: ', list);
     });
   }
 

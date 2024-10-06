@@ -127,6 +127,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   onSubmitRegister() {
     this.userService.createUser(this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
+      console.log('User registered:', userCredential);
+      console.log('additional Info', getAdditionalUserInfo(userCredential));
       this.userService.addUser({
         uid: userCredential.user.uid,
         firstName: this.loginForm.value.firstName,
