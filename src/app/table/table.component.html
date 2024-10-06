@@ -115,18 +115,16 @@
                           </td>
                       </tr>
                       <tr class="table-group-divider-bottom">
-                        <td>
-                          <div class="mx-3 d-flex flex-column">
-                            <span class="my-1">Player Count:</span>
-                            <span class="my-1">Play Time:</span>
-                            <span class="my-1">Location:</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-flex flex-column">
-                            <span class="my-1">{{ item.min_players }} <ng-container *ngIf="item.max_players !== item.min_players">- {{ item.max_players }}</ng-container></span>
-                            <span class="my-1">{{ item.min_play_time }} <ng-container *ngIf="item.max_play_time !== item.min_play_time">- {{ item.max_play_time }}</ng-container> minutes</span>
-                            <span class="my-1">{{ item.custom_fields.Location }}</span>
+                        <td colspan="2">
+                          <div class="container text-left">
+                            <div class="row row-cols-2">
+                              <div class="col">Player Count:</div>
+                              <div class="col">{{ item.min_players }} <ng-container *ngIf="item.max_players !== item.min_players">- {{ item.max_players }}</ng-container></div>
+                              <div class="col">Play Time:</div>
+                              <div class="col">{{ item.min_play_time }} <ng-container *ngIf="item.max_play_time !== item.min_play_time">- {{ item.max_play_time }}</ng-container> minutes</div>
+                              <div class="col">Location:</div>
+                              <div class="col">{{ item.custom_fields.Location }}</div>
+                            </div>
                           </div>
                         </td>
                       </tr>
