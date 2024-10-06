@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { NgbdSortableHeader } from '../directive/ngbd-sortable-header.directive';
 import { BggService } from '../service/bgg.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -11,6 +11,7 @@ import { UserService } from '../service/user.service';
 import { GameService } from '../service/game.service';
 import { User } from '../model/user.model';
 import { firstValueFrom } from 'rxjs';
+import { UserGamelistRef } from '../model/user-gamelist-ref.model';
 
 @Component({
   selector: 'app-table',
@@ -45,8 +46,10 @@ export class TableComponent implements OnInit, AfterViewInit {
 
   selectListValue: string = '';
   newListName: string = '';
-  userGameLists?: any[];
+  userGameLists?: UserGamelistRef[];
   currentGameList?: any[] = [];
+  shareEmail: string = '';
+  showShareAlert: boolean = false;
 
   constructor() {}
 
@@ -55,8 +58,9 @@ export class TableComponent implements OnInit, AfterViewInit {
       if (user) {
         this.userSignedIn = true;
         firstValueFrom(this.userService.fetchUser(user.uid)).then((user: User) => {
-          this.getUserGameLists();
-          this.selectListValue = user?.gameList?.[0].id || '';
+        });
+        firstValueFrom(this.userService.fetchUserGameLists(user.uid)).then((gameLists: any) => {
+          this.selectListValue = gameLists?.[0]?.id || '';
           this.onSelected();
         });
       }
@@ -129,7 +133,7 @@ export class TableComponent implements OnInit, AfterViewInit {
       photo: game?.bgg_icon_uri,
       id: game?.id
     }).then((id: string) => {
-      setTimeout(() => { 
+      setTimeout(() => {
         this.buttonLoading.delete(index);
       }, 200);
     });
@@ -151,14 +155,14 @@ export class TableComponent implements OnInit, AfterViewInit {
 
   createNewList() {
     this.gameService.createGameList(this.newListName).then((id: string) => {
-      this.getUserGameLists();
       this.selectListValue = id;
       this.newListName = '';
+      this.onSelected();
     });
   }
 
   getUserGameLists() {
-    this.userGameLists = this.userService.getCurrentUserData()?.gameList;
+    this.userGameLists = this.userService.getCurrentUserGameLists();
   }
 
   checkIfUserGameListEmptyOrNull() {
@@ -166,13 +170,58 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   onSelected() {
-    this.gameService.fetchGameList(this.selectListValue).subscribe(data => {
-      this.currentGameList = data.gameList;
+    if (!this.selectListValue) {
+      return;
+    }
+    this.gameService.fetchGameList(this.selectListValue).then(data => {
+      this.currentGameList = data?.gameList;
+      this.getUserGameLists();
     });
   }
 
   gameExistsInList(bggGame: BggItem) {
     return this.currentGameList?.some(game => game.id === bggGame.id);
+  }
+
+  getColSpan(): number {
+    return Array.from(document?.getElementById('headerRow')?.children!).filter(el => {
+      return getComputedStyle(el).display !== 'none';
+    }).length;
+  }
+
+  getRowSpan(): number {
+    return this.getColSpan() <= 3 ? 2 : 1;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    document.querySelectorAll('.dynamic-rowspan').forEach(el => {
+      el.setAttribute('rowspan', this.getRowSpan().toString());
+    });
+  }
+
+  deleteGameListAndReferences() {
+    this.gameService.deleteGameListAndReferences(this.selectListValue).then(listId => {
+      this.userGameLists = this.userGameLists?.filter(list => list.id !== listId);
+      this.selectListValue = this.userGameLists?.[0].id || '';
+      this.onSelected();
+    });
+  }
+
+  shareGameList() {
+    let gameName = this.userGameLists?.find(item => item.id === this.selectListValue)?.name!;
+    this.gameService.shareGameList(this.selectListValue, gameName, this.shareEmail).then(id => {
+      if (!id || id === '') {
+        console.error('Failed to share game list');
+      }
+      else {
+        this.showShareAlert = true;
+      setTimeout(() => {
+        this.showShareAlert = false;
+      }, 3000);
+      }
+      this.shareEmail = '';
+    });
   }
 
   get pageNumber() {

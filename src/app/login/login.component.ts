@@ -107,11 +107,9 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   toggleRegister() {
     if (this.isRegister) {
-      console.log('Switching to login form');
       this.createLoginForm();
       this.isRegister = !this.isRegister;
     } else {
-      console.log('Switching to register form');
       this.createRegisterForm();
       this.isRegister = !this.isRegister;
     }
@@ -127,11 +125,13 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   onSubmitRegister() {
     this.userService.createUser(this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
+      let additionalInfo = getAdditionalUserInfo(userCredential);
       this.userService.addUser({
         uid: userCredential.user.uid,
         firstName: this.loginForm.value.firstName,
         lastName: this.loginForm.value.lastName,
-        provider: userCredential.providerId
+        provider: (additionalInfo?.providerId || 'firebase'),
+        email: userCredential.user.email
       });
       this.router.navigate([this.redirectUrl]);
     }).catch((error: any) => {
@@ -142,12 +142,14 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   googleLogin() {
     this.userService.signUserInWithGoogle().then((userCredential: any) => {
-      if (getAdditionalUserInfo(userCredential)?.isNewUser) {
+      let additionalInfo = getAdditionalUserInfo(userCredential);
+      if (additionalInfo?.isNewUser) {
         this.userService.addUser({
           uid: userCredential.user.uid,
           firstName: userCredential.user.displayName.split(' ')[0],
           lastName: userCredential.user.displayName.split(' ')[1],
-          provider: userCredential.providerId
+          provider: userCredential.providerId,
+          email: userCredential.user.email
         });
       }
       this.router.navigate([this.redirectUrl]);

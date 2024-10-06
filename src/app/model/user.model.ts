@@ -3,8 +3,5 @@ export interface User {
   firstName: string;
   lastName: string;
   provider: string;
-  gameList?: Array<{
-    id: string;
-    name: string;
-  }>;
+  email: string;
 }
