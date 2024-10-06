@@ -168,7 +168,7 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   onSelected() {
-    if (!this.selectListValue) { 
+    if (!this.selectListValue) {
       return;
     }
     this.gameService.fetchGameList(this.selectListValue).then(data => {
@@ -198,9 +198,11 @@ export class TableComponent implements OnInit, AfterViewInit {
     });
   }
 
-  fetchUserGameListCollection() {
-    this.gameService.fetchUsersWithGameList(this.selectListValue).then(list => {
-      console.log('list: ', list);
+  deleteGameListAndReferences() {
+    this.gameService.deleteGameListAndReferences(this.selectListValue).then(listId => {
+      this.userGameLists = this.userGameLists?.filter(list => list.id !== listId);
+      this.selectListValue = this.userGameLists?.[0].id || '';
+      this.onSelected();
     });
   }
 

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { FirestoreService } from './firestore.service';
 import { USERS_DB, UserService } from './user.service';
 import { Game } from '../model/game.model';
-import { arrayRemove, arrayUnion, where } from '@angular/fire/firestore';
+import { arrayRemove, arrayUnion, deleteDoc, where } from '@angular/fire/firestore';
 import { firstValueFrom, lastValueFrom, Observable, tap } from 'rxjs';
 import { GameList } from '../model/gamelist.model';
 import { UserGamelistRef } from '../model/user-gamelist-ref.model';
@@ -57,7 +57,18 @@ export class GameService {
     return firstValueFrom(this.firestore.getDocData(DATALIST_DB.DATA_LISTS, gameListId));
   }
 
-  fetchUsersWithGameList(gameListId: string): Promise<UserGamelistRef[]> { 
+  fetchUsersWithGameList(gameListId: string): Promise<UserGamelistRef[]> {
     return this.firestore.querySubCollectionData(USERS_DB.GAME_LISTS, where('id', '==', gameListId));
+  }
+
+  deleteGameListAndReferences(gameListId: string): Promise<string> {
+    return this.firestore.deleteDocument(DATALIST_DB.DATA_LISTS, gameListId).then((id) => {
+      return this.fetchUsersWithGameList(gameListId).then(dataArray => {
+        dataArray.forEach(userGameList => {
+          this.firestore.deleteDocument(USERS_DB.USERS, userGameList.userId, USERS_DB.GAME_LISTS, gameListId);
+        });
+        return id;
+      });
+    });
   }
 }

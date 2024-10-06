@@ -8,17 +8,17 @@
       <div>
         <div class="input-group">
           <div class="form-floating" style="min-width: 200px;">
-            <select id="gameListSelect" class="form-select" aria-label="Select Game List" placeholder="" [disabled]="checkIfUserGameListEmptyOrNull()" (change)="onSelected()" [(ngModel)]="selectListValue">
+            <select id="gameListSelect" class="form-select" aria-label="Select Game List" placeholder="" [disabled]="checkIfUserGameListEmptyOrNull() || !userSignedIn" (change)="onSelected()" [(ngModel)]="selectListValue">
               @for (gameList of userGameLists; track gameList.id;) {
                 <option [value]="gameList.id">{{ gameList.name }}</option>
               }
             </select>
             <label for="gameListSelect">Game List</label>
           </div>
-          <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-gear-fill"></i></button>
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" [disabled]="!userSignedIn"><i class="bi bi-gear-fill"></i></button>
           <ul class="dropdown-menu dropdown-menu-end">
             <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
-            <button class="dropdown-item" type="button" (click)="fetchUserGameListCollection()">Fetch List</button>
+            <button class="dropdown-item" type="button" [disabled]="checkIfUserGameListEmptyOrNull()" (click)="deleteGameListAndReferences()">Delete List</button>
           </ul>
         </div>
       </div>

@@ -127,13 +127,12 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   onSubmitRegister() {
     this.userService.createUser(this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
-      console.log('User registered:', userCredential);
-      console.log('additional Info', getAdditionalUserInfo(userCredential));
+      let additionalInfo = getAdditionalUserInfo(userCredential);
       this.userService.addUser({
         uid: userCredential.user.uid,
         firstName: this.loginForm.value.firstName,
         lastName: this.loginForm.value.lastName,
-        provider: userCredential.providerId
+        provider: (additionalInfo?.providerId || 'firebase')
       });
       this.router.navigate([this.redirectUrl]);
     }).catch((error: any) => {

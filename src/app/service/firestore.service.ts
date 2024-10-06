@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { addDoc, arrayUnion, collection, collectionData, collectionGroup, doc, docData, Firestore, getDocs, limitToLast, orderBy, query, QueryFieldFilterConstraint, setDoc, updateDoc, where } from '@angular/fire/firestore';
+import { addDoc, arrayUnion, collection, collectionData, collectionGroup, deleteDoc, doc, docData, Firestore, getDocs, limitToLast, orderBy, query, QueryFieldFilterConstraint, setDoc, updateDoc, where } from '@angular/fire/firestore';
 import { debounceTime, exhaustAll, lastValueFrom, mergeAll, Observable, takeLast, tap, firstValueFrom } from 'rxjs';
 import { UserGamelistRef } from '../model/user-gamelist-ref.model';
 
@@ -50,5 +50,12 @@ export class FirestoreService {
     return firstValueFrom(collectionData(query(collectionGroupRef, groupQuery)).pipe(
       debounceTime(200),
     ));
+  }
+
+  deleteDocument(...pathSegments: string[]): Promise<string> {
+    let docRef = doc(this.firestore, pathSegments.shift()!,...pathSegments);
+    return deleteDoc(docRef).then(() => {
+      return docRef.id;
+    });
   }
 }
