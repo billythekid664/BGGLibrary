@@ -12,6 +12,7 @@ import { GameService } from '../service/game.service';
 import { User } from '../model/user.model';
 import { firstValueFrom } from 'rxjs';
 import { UserGamelistRef } from '../model/user-gamelist-ref.model';
+import { ActiveService } from '../service/active.service';
 
 @Component({
   selector: 'app-table',
@@ -24,6 +25,7 @@ export class TableComponent implements OnInit, AfterViewInit {
   private bggService = inject(BggService);
   private userService = inject(UserService);
   private gameService = inject(GameService);
+  private activeService = inject(ActiveService);
 
   @ViewChildren(NgbdSortableHeader) headers!: QueryList<NgbdSortableHeader>;
 
@@ -50,6 +52,7 @@ export class TableComponent implements OnInit, AfterViewInit {
   currentGameList?: any[] = [];
   shareEmail: string = '';
   showShareAlert: boolean = false;
+  showShareErrorAlert: boolean = false;
 
   constructor() {}
 
@@ -68,6 +71,7 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.activeService.setActive(1);
     setTimeout(() => {
       let nameHeader = this.headers.find(h => h.sortable === "name");
       if (!nameHeader) return;
@@ -116,15 +120,6 @@ export class TableComponent implements OnInit, AfterViewInit {
     return date.fromNow();
   }
 
-  setAccordion(index: number) {
-    let accordion = 'accordion-';
-    if (this.accordionItem.endsWith(index.toString())) {
-      this.accordionItem = ''
-    } else {
-      this.accordionItem = accordion + index;
-    }
-  }
-
   addGameToList(index: number, game: BggItem) {
     this.buttonLoading.set(index, true);
     this.gameService.addGameToList(this.selectListValue, {
@@ -133,6 +128,7 @@ export class TableComponent implements OnInit, AfterViewInit {
       photo: game?.bgg_icon_uri,
       id: game?.id
     }).then((id: string) => {
+      this.onSelected();
       setTimeout(() => {
         this.buttonLoading.delete(index);
       }, 200);
@@ -147,6 +143,7 @@ export class TableComponent implements OnInit, AfterViewInit {
       photo: game?.bgg_icon_uri,
       id: game?.id
     }).then(() => {
+      this.onSelected();
       setTimeout(() => {
         this.buttonLoading.delete(index);
       }, 200);
@@ -213,13 +210,15 @@ export class TableComponent implements OnInit, AfterViewInit {
     this.gameService.shareGameList(this.selectListValue, gameName, this.shareEmail).then(id => {
       if (!id || id === '') {
         console.error('Failed to share game list');
+        this.showShareErrorAlert = true;
       }
       else {
         this.showShareAlert = true;
+      }
       setTimeout(() => {
         this.showShareAlert = false;
+        this.showShareErrorAlert = false;
       }, 3000);
-      }
       this.shareEmail = '';
     });
   }

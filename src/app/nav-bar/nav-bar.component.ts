@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Auth, authState, signOut, user } from '@angular/fire/auth';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { traceUntilFirst } from '@angular/fire/performance';
 import { map } from 'rxjs';
 import { UserService } from '../service/user.service';
 import { User } from '../model/user.model';
+import { ActiveService } from '../service/active.service';
 
 
 @Component({
@@ -15,10 +16,11 @@ import { User } from '../model/user.model';
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.css'
 })
-export class NavBarComponent implements OnInit, OnDestroy {
+export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private userService = inject(UserService);
+  private activeService = inject(ActiveService);
   active: number = 1;
   loggedIn: boolean = false;
   userSubscription: any;
@@ -39,9 +41,15 @@ export class NavBarComponent implements OnInit, OnDestroy {
         if (!!user?.uid) {
           this.getUserData(user.uid);
           if (![1,2,3].includes(this.active)) {
-            this.setActive(1);
+            this.activeService.setActive(1);
           }
         }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.activeService.checkActive().subscribe((active: number) => {
+      this.active = active;
     });
   }
 
@@ -49,12 +57,9 @@ export class NavBarComponent implements OnInit, OnDestroy {
     this.querySub.unsubscribe();
     this.userSubscription.unsubscribe();
   }
-  setActive(index: number): void {
-    this.active = index;
-  }
 
   handleNavClick(index: number): void {
-    this.setActive(index);
+    this.activeService.setActive(index);
     document.getElementById('navToggleButton')?.click();
   }
 
@@ -65,7 +70,7 @@ export class NavBarComponent implements OnInit, OnDestroy {
         this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();
       }
     });
-    this.userService.fetchUserGameLists(uid).subscribe((gameLists: any) => {});
+    // this.userService.fetchUserGameLists(uid).subscribe((gameLists: any) => {});
   }
 
   logout() {

@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subscription, take } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { UserService } from '../service/user.service';
 import { UserCredential } from 'firebase/auth';
 import { User } from '../model/user.model';
 import { getAdditionalUserInfo } from '@angular/fire/auth';
+import { ActiveService } from '../service/active.service';
 
 @Component({
   selector: 'app-login',
@@ -17,11 +18,12 @@ import { getAdditionalUserInfo } from '@angular/fire/auth';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
+  private activeService = inject(ActiveService)
   userSubscription?: Subscription;
   loginForm!: FormGroup;
   isRegister: boolean = false;
@@ -43,6 +45,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe(params => {
       this.redirectUrl = params['redirectUrl'] ? decodeURIComponent(params['redirectUrl']) : '/';
     });
+  }
+
+  ngAfterViewInit(): void {
+      this.activeService.setActive(3)
   }
 
   ngOnDestroy(): void {
