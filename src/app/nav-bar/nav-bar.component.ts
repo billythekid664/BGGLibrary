@@ -70,7 +70,6 @@ export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
         this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();
       }
     });
-    // this.userService.fetchUserGameLists(uid).subscribe((gameLists: any) => {});
   }
 
   logout() {

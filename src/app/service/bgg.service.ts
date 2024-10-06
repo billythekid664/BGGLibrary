@@ -29,7 +29,6 @@ export class BggService {
         .append('_sort_order', sortBy)
         .append('is_in_circulation', '1')
         .append('query', query || '');
-    console.log('params: ', params)
     return this.http.get(this.libraryUrl, {params});
   }
 
