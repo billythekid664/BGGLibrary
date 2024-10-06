@@ -99,7 +99,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   getBggGameInfo(game: Game) {
-    return this.bggGameMap.get(game.id!)!;
+    return this.bggGameMap.get(game.id!);
   }
 
   getColSpan(): number {
@@ -122,7 +122,10 @@ export class UserComponent implements OnInit, AfterViewInit {
     }
     this.gameService.fetchGameList(this.selectListValue).then(data => {
       this.totalNumItems = data.gameList?.length || 0
-      this.currentGameList = this.chunk(data?.gameList || [], 10);
+      let newList = data?.gameList?.sort((a, b) => {
+          return a?.name?.localeCompare(b?.name || '') || 0;
+      });
+      this.currentGameList = this.chunk(newList || [], 10);
       this.startFetch(0);
       this.getUserGameLists();
     });
@@ -170,6 +173,15 @@ export class UserComponent implements OnInit, AfterViewInit {
 
 		this.sortColumn = column;
 		this.sortDirection = direction;
+    
+    let newList = (this.currentGameList.flat() as Game[]).sort((a: Game, b: Game) => {
+      if (direction === 'asc') {
+        return this.getBggGameInfo(a)?.[(column as keyof BggItem)]?.localeCompare(this.getBggGameInfo(b)?.[(column as keyof BggItem)]) || 0;
+      } else {
+        return this.getBggGameInfo(b)?.[(column as keyof BggItem)]?.localeCompare(this.getBggGameInfo(a)?.[(column as keyof BggItem)]) || 0;
+      }
+    });
+    this.currentGameList = this.chunk(newList, 10);
     this.startFetch(100);
 	}
 
