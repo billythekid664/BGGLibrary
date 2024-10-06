@@ -48,6 +48,8 @@ export class TableComponent implements OnInit, AfterViewInit {
   newListName: string = '';
   userGameLists?: UserGamelistRef[];
   currentGameList?: any[] = [];
+  shareEmail: string = '';
+  showShareAlert: boolean = false;
 
   constructor() {}
 
@@ -203,6 +205,22 @@ export class TableComponent implements OnInit, AfterViewInit {
       this.userGameLists = this.userGameLists?.filter(list => list.id !== listId);
       this.selectListValue = this.userGameLists?.[0].id || '';
       this.onSelected();
+    });
+  }
+
+  shareGameList() {
+    let gameName = this.userGameLists?.find(item => item.id === this.selectListValue)?.name!;
+    this.gameService.shareGameList(this.selectListValue, gameName, this.shareEmail).then(id => {
+      if (!id || id === '') {
+        console.error('Failed to share game list');
+      }
+      else {
+        this.showShareAlert = true;
+      setTimeout(() => {
+        this.showShareAlert = false;
+      }, 3000);
+      }
+      this.shareEmail = '';
     });
   }
 

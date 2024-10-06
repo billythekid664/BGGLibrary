@@ -3,4 +3,5 @@ export interface User {
   firstName: string;
   lastName: string;
   provider: string;
+  email: string;
 }

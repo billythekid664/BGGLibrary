@@ -6,6 +6,7 @@ import { arrayRemove, arrayUnion, deleteDoc, where } from '@angular/fire/firesto
 import { firstValueFrom, lastValueFrom, Observable, tap } from 'rxjs';
 import { GameList } from '../model/gamelist.model';
 import { UserGamelistRef } from '../model/user-gamelist-ref.model';
+import { User } from '../model/user.model';
 
 export const DATALIST_DB = {
   DATA_LISTS: 'dataLists'
@@ -44,13 +45,19 @@ export class GameService {
   }
 
   createUserGameList(gameListId: string, gameListName: string): Promise<string> {
+   return this.createSpecifiedUserGameList(gameListId, gameListName, this.userService.getCurrentUserData());
+  }
+
+  private createSpecifiedUserGameList(gameListId: string, gameListName: string, user: User): Promise<string> {
     let data = {
       id: gameListId,
       name: gameListName,
-      userId: this.userService.getCurrentUserData().uid,
-      owner: this.userService.getCurrentUserData().uid
+      userId: user.uid,
+      owner: user.uid
     }
-    return this.firestore.createSubDocData(data, USERS_DB.USERS, this.userService.getCurrentUserData().uid, USERS_DB.GAME_LISTS, gameListId);
+    console.log('creating user game list: ', data);
+    console.log('creating game list with user: ', user);
+    return this.firestore.createSubDocData(data, USERS_DB.USERS, user.uid, USERS_DB.GAME_LISTS, gameListId);
   }
 
   fetchGameList(gameListId: string): Promise<GameList> {
@@ -58,7 +65,7 @@ export class GameService {
   }
 
   fetchUsersWithGameList(gameListId: string): Promise<UserGamelistRef[]> {
-    return this.firestore.querySubCollectionData(USERS_DB.GAME_LISTS, where('id', '==', gameListId));
+    return this.firestore.queryCollectionGroupData(USERS_DB.GAME_LISTS, where('id', '==', gameListId));
   }
 
   deleteGameListAndReferences(gameListId: string): Promise<string> {
@@ -69,6 +76,17 @@ export class GameService {
         });
         return id;
       });
+    });
+  }
+
+  shareGameList(gameListId: string, gameListName: string, email: string): Promise<string> {
+    return this.firestore.queryCollectionData(USERS_DB.USERS, where('email', '==', email)).then((users: any) => {
+      console.log('Found users:', users);
+      if (users.length === 0) {
+        console.error(`No user found with email: ${email}`);
+        return '';
+      }
+      return this.createSpecifiedUserGameList(gameListId, gameListName, users[0]);
     });
   }
 }

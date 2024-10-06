@@ -45,9 +45,16 @@ export class FirestoreService {
     });
   }
 
-  querySubCollectionData(groupName: string, groupQuery: QueryFieldFilterConstraint): Promise<any> {
+  queryCollectionGroupData(groupName: string, groupQuery: QueryFieldFilterConstraint): Promise<any> {
     let collectionGroupRef = collectionGroup(this.firestore, groupName);
     return firstValueFrom(collectionData(query(collectionGroupRef, groupQuery)).pipe(
+      debounceTime(200),
+    ));
+  }
+
+  queryCollectionData(collectionName: string, collectionQuery: QueryFieldFilterConstraint): Promise<any> {
+    let collectionGroupRef = collection(this.firestore, collectionName);
+    return firstValueFrom(collectionData(query(collectionGroupRef, collectionQuery)).pipe(
       debounceTime(200),
     ));
   }
