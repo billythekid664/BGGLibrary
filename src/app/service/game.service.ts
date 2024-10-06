@@ -55,8 +55,6 @@ export class GameService {
       userId: user.uid,
       owner: user.uid
     }
-    console.log('creating user game list: ', data);
-    console.log('creating game list with user: ', user);
     return this.firestore.createSubDocData(data, USERS_DB.USERS, user.uid, USERS_DB.GAME_LISTS, gameListId);
   }
 

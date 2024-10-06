@@ -34,6 +34,8 @@ export class TableComponent implements OnInit, AfterViewInit {
   items: BggItem[] = [];
   paging: any = {};
 
+  firstLoad = true;
+
   loading: boolean = false;
   buttonLoading: Map<number, boolean> = new Map();
   userSignedIn: boolean = false;
@@ -60,11 +62,15 @@ export class TableComponent implements OnInit, AfterViewInit {
     this.userService.checkAuth().subscribe((user: any) => {
       if (user) {
         this.userSignedIn = true;
-        firstValueFrom(this.userService.fetchUser(user.uid)).then((user: User) => {
+        this.userService.fetchUser(user.uid).subscribe((user: User) => {
         });
-        firstValueFrom(this.userService.fetchUserGameLists(user.uid)).then((gameLists: any) => {
-          this.selectListValue = gameLists?.[0]?.id || '';
-          this.onSelected();
+        this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
+          if (this.firstLoad) {
+            this.selectListValue = gameLists?.[0]?.id || '';
+            this.onSelected();
+            this.firstLoad = false;
+          }
+          
         });
       }
     });
@@ -152,6 +158,7 @@ export class TableComponent implements OnInit, AfterViewInit {
 
   createNewList() {
     this.gameService.createGameList(this.newListName).then((id: string) => {
+      console.log('id: ', id);
       this.selectListValue = id;
       this.newListName = '';
       this.onSelected();
@@ -171,6 +178,7 @@ export class TableComponent implements OnInit, AfterViewInit {
       return;
     }
     this.gameService.fetchGameList(this.selectListValue).then(data => {
+      console.log('gameData: ', data)
       this.currentGameList = data?.gameList;
       this.getUserGameLists();
     });

@@ -29,6 +29,8 @@ export class UserComponent implements OnInit, AfterViewInit {
 
   @ViewChildren(NgbdSortableHeader) headers!: QueryList<NgbdSortableHeader>;
 
+  firstLoad: boolean = true;
+
   loading: boolean = false;
   buttonLoading: Map<number, boolean> = new Map();
   bggGameMap: Map<string, BggItem> = new Map();
@@ -56,11 +58,14 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.userService.checkAuth().subscribe((user: any) => {
       if (user) {
         this.userSignedIn = true;
-        firstValueFrom(this.userService.fetchUser(user.uid)).then((user: User) => {
+        this.userService.fetchUser(user.uid).subscribe((user: User) => {
         });
-        firstValueFrom(this.userService.fetchUserGameLists(user.uid)).then((gameLists: any) => {
-          this.selectListValue = gameLists?.[0]?.id || '';
-          this.onSelected();
+        this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
+          if (this.firstLoad) {
+            this.selectListValue = gameLists?.[0]?.id || '';
+            this.onSelected();
+            this.firstLoad = false;
+          }
         });
       }
     });
