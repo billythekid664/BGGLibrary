@@ -45,17 +45,20 @@ export class GameService {
   }
 
   createUserGameList(gameListId: string, gameListName: string): Promise<string> {
-   return this.createSpecifiedUserGameList(gameListId, gameListName, this.userService.getCurrentUserData());
+   return this.createSpecifiedUserGameList({
+    id: gameListId,
+    name: gameListName
+   }, this.userService.getCurrentUserData());
   }
 
-  private createSpecifiedUserGameList(gameListId: string, gameListName: string, user: User): Promise<string> {
+  private createSpecifiedUserGameList(gameList: UserGamelistRef, user: User): Promise<string> {
     let data = {
-      id: gameListId,
-      name: gameListName,
+      id: gameList.id,
+      name: gameList.name,
       userId: user.uid,
-      owner: user.uid
+      owner: gameList?.ownerId ? gameList.ownerId : user.uid 
     }
-    return this.firestore.createSubDocData(data, USERS_DB.USERS, user.uid, USERS_DB.GAME_LISTS, gameListId);
+    return this.firestore.createSubDocData(data, USERS_DB.USERS, user.uid, USERS_DB.GAME_LISTS, gameList.id);
   }
 
   fetchGameList(gameListId: string): Promise<GameList> {
@@ -70,21 +73,21 @@ export class GameService {
     return this.firestore.deleteDocument(DATALIST_DB.DATA_LISTS, gameListId).then((id) => {
       return this.fetchUsersWithGameList(gameListId).then(dataArray => {
         dataArray.forEach(userGameList => {
-          this.firestore.deleteDocument(USERS_DB.USERS, userGameList.userId, USERS_DB.GAME_LISTS, gameListId);
+          this.firestore.deleteDocument(USERS_DB.USERS, userGameList.userId!, USERS_DB.GAME_LISTS, gameListId);
         });
         return id;
       });
     });
   }
 
-  shareGameList(gameListId: string, gameListName: string, email: string): Promise<string> {
+  shareGameList(gameList: UserGamelistRef, email: string): Promise<string> {
     return this.firestore.queryCollectionData(USERS_DB.USERS, where('email', '==', email)).then((users: any) => {
       console.log('Found users:', users);
       if (users.length === 0) {
         console.error(`No user found with email: ${email}`);
         return '';
       }
-      return this.createSpecifiedUserGameList(gameListId, gameListName, users[0]);
+      return this.createSpecifiedUserGameList(gameList, users[0]);
     });
   }
 }

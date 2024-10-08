@@ -214,8 +214,8 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   shareGameList() {
-    let gameName = this.userGameLists?.find(item => item.id === this.selectListValue)?.name!;
-    this.gameService.shareGameList(this.selectListValue, gameName, this.shareEmail).then(id => {
+    let gameList = this.userGameLists?.find(item => item.id === this.selectListValue)!;
+    this.gameService.shareGameList(gameList, this.shareEmail).then(id => {
       if (!id || id === '') {
         console.error('Failed to share game list');
         this.showShareErrorAlert = true;
