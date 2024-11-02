@@ -25,6 +25,8 @@
               </div>
               <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" [disabled]="!userSignedIn"><i class="bi bi-gear-fill"></i></button>
               <ul class="dropdown-menu dropdown-menu-end">
+                <button class="dropdown-item" type="button" (click)="onSelected()">Refresh List</button>
+                <div class="dropdown-divider"></div>
                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#shareModal" [disabled]="checkIfUserGameListEmptyOrNull()">Share List</button>
                 <div class="dropdown-divider"></div>
@@ -73,8 +75,7 @@
                                     }
                                     @else { 
                                         <div class="flex-container" style="min-width: 100px">
-                                            <ng-container *ngIf="getBggGameInfo(item)?.is_checked_out === 0; else checkedOut">Available</ng-container>
-                                            <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(getBggGameInfo(item).last_checkout_date) }}</ng-template>
+                                            {{ getAvailabilityText(item) }}
                                         </div> 
                                     }                                  
                               </td>
@@ -184,6 +185,14 @@
           <div id="pagination-container" class="pt-2">
               <ngb-pagination [collectionSize]="totalNumItems" [(page)]="pageNumber" [maxSize]="3" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize"></ngb-pagination>
           </div>
+          <div id="select-container" class="pt-2">
+            <select style="width: fit-content;" class="form-select" name="pageSize" [(ngModel)]="pageSize">
+                <option [ngValue]="10">10 items per page</option>
+                <option [ngValue]="25">25 items per page</option>
+                <option [ngValue]="50">50 items per page</option>
+                <option [ngValue]="100">100 items per page</option>
+            </select>
+        </div>
         </div>
       </div>
 </div>

@@ -75,8 +75,7 @@
                           </td>
                           <td>
                               <div class="flex-container" style="min-width: 100px">
-                                  <ng-container *ngIf="item.is_checked_out === 0; else checkedOut">Available</ng-container>
-                                  <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(item.last_checkout_date) }}</ng-template>
+                                  {{ getAvailabilityText(item) }}
                               </div>
                           </td>
                           <td class="mobile-hide">

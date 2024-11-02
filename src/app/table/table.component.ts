@@ -230,6 +230,13 @@ export class TableComponent implements OnInit, AfterViewInit {
     });
   }
 
+  getAvailabilityText(item: BggItem): string {
+    if (item.is_checked_out === 0) {
+      return 'Available';
+    }
+    return `Checked out ${this.getLastcheckoutTime(item.last_checkout_date)}`;
+  }
+
   get pageNumber() {
     return this._pageNumber;
   }

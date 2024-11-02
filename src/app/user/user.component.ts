@@ -83,20 +83,21 @@ export class UserComponent implements OnInit, AfterViewInit {
     }, 100);
   }
 
-  startFetch(delay = 500, filter = false) {
+  startFetch(delay = 500, filter = false, refetchBggInfo = false) {
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => {
       if (filter) {
         this.filterList();
       }
-      this.getBggInfo();
-      // this.getBggInfo(); TODO: get info for the current game page
+      if (refetchBggInfo) {
+        this.getBggInfo();
+      }
     }, delay);
   }
 
   getBggInfo() {
     this.bggGameMap.clear();
-    this.filteredGameList[this.listIndex()]?.forEach((game: Game) => {
+    this.filteredGameList.flat()?.forEach((game: Game) => {
       this.bggService.getBggGameInfo(game.id!).subscribe((item: any) => {
         this.bggGameMap.set(game.id!, item.result);
       });
@@ -133,9 +134,11 @@ export class UserComponent implements OnInit, AfterViewInit {
       });
       this.currentGameList = newList || [];
       this.filterList();
-      this.startFetch(0);
+      this.getBggInfo();
       this.getUserGameLists();
-      this.loading = false;
+      setTimeout(() => {
+        this.loading = false;
+      }, 200)
     });
   }
 
@@ -164,20 +167,28 @@ export class UserComponent implements OnInit, AfterViewInit {
 				header.direction = '';
 			}
 		});
-
 		this.sortColumn = column;
 		this.sortDirection = direction;
-    
-    let newList = (this.filteredGameList.flat() as Game[]).sort((a: Game, b: Game) => {
+    let newList = this.filteredGameList.flat().sort((a: Game, b: Game) => {
+      let first: string = this.getBggGameInfo(a)?.[(column as keyof BggItem)] || '';
+      let second: string = this.getBggGameInfo(b)?.[(column as keyof BggItem)] || '';
       if (direction === 'asc') {
-        return this.getBggGameInfo(a)?.[(column as keyof BggItem)]?.localeCompare(this.getBggGameInfo(b)?.[(column as keyof BggItem)]) || 0;
+        return first?.localeCompare(second);
       } else {
-        return this.getBggGameInfo(b)?.[(column as keyof BggItem)]?.localeCompare(this.getBggGameInfo(a)?.[(column as keyof BggItem)]) || 0;
+        return second?.localeCompare(first);
       }
+
     });
     this.chunkFilteredList(newList);
-    this.startFetch(100);
 	}
+
+  getAvailabilityText(item: Game): string {
+    let bggItem = this.getBggGameInfo(item);
+    if (bggItem.is_checked_out === 0) {
+      return 'Available';
+    }
+    return `Checked out ${this.getLastcheckoutTime(bggItem.last_checkout_date)}`;
+  }
 
   getLastcheckoutTime(datetime: any) {
     let timezone = moment.tz.guess();
@@ -239,7 +250,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   chunkFilteredList(newList: Game[]) {
-    this.filteredGameList = !!newList && newList.length > 0 ? this.chunk(newList, 10) : [[]];
+    this.filteredGameList = !!newList && newList.length > 0 ? this.chunk(newList, this._pageSize) : [[]];
   }
 
   filterList() {
@@ -273,12 +284,12 @@ export class UserComponent implements OnInit, AfterViewInit {
 
   set pageNumber(pageNumber: number) {
     this._pageNumber = pageNumber;
-    this.startFetch(200);
+    this.startFetch(200, false, true);
   }
 
   set pageSize(pageSize: number) {
     this._pageSize = pageSize;
-    this.startFetch(200);
+    this.startFetch(200, true, true);
   }
 
   set searchTerm(searchTerm: string) {
