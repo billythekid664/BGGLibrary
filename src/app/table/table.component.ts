@@ -178,7 +178,6 @@ export class TableComponent implements OnInit, AfterViewInit {
       return;
     }
     this.gameService.fetchGameList(this.selectListValue).then(data => {
-      console.log('gameData: ', data)
       this.currentGameList = data?.gameList;
       this.getUserGameLists();
     });
