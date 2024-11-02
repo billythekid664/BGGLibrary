@@ -25,6 +25,8 @@
               </div>
               <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" [disabled]="!userSignedIn"><i class="bi bi-gear-fill"></i></button>
               <ul class="dropdown-menu dropdown-menu-end">
+                <button class="dropdown-item" type="button" (click)="onSelected()">Refresh List</button>
+                <div class="dropdown-divider"></div>
                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#shareModal" [disabled]="checkIfUserGameListEmptyOrNull()">Share List</button>
                 <div class="dropdown-divider"></div>
@@ -56,8 +58,8 @@
                           </div>
                       </td>
                   }
-                  @else if (currentGameList[listIndex()] && currentGameList[listIndex()].length > 0) {
-                      <ng-container *ngFor="let item of currentGameList[listIndex()]; let i = index">
+                  @else if (currentGameList[listIndex()] && filteredGameList[listIndex()].length > 0) {
+                      <ng-container *ngFor="let item of filteredGameList[listIndex()]; let i = index">
                           <tr>
                               <td>
                                   <div class="flex-container" style="min-width: 200px">
@@ -73,8 +75,7 @@
                                     }
                                     @else { 
                                         <div class="flex-container" style="min-width: 100px">
-                                            <ng-container *ngIf="item.is_checked_out === 0; else checkedOut">Available</ng-container>
-                                            <ng-template #checkedOut>Checked out {{ getLastcheckoutTime(getBggGameInfo(item)?.last_checkout_date) }}</ng-template>
+                                            {{ getAvailabilityText(item) }}
                                         </div> 
                                     }                                  
                               </td>
@@ -86,7 +87,7 @@
                                     }
                                     @else { 
                                         <div class="flex-container">
-                                            {{ getBggGameInfo(item)?.min_players }} <ng-container *ngIf="getBggGameInfo(item)?.max_players !== getBggGameInfo(item)?.min_players">- {{ getBggGameInfo(item)?.max_players }}</ng-container>
+                                            {{ getBggGameInfo(item).min_players }} <ng-container *ngIf="getBggGameInfo(item)?.max_players !== getBggGameInfo(item)?.min_players">- {{ getBggGameInfo(item).max_players }}</ng-container>
                                         </div>
                                     }
                               </td>
@@ -98,7 +99,7 @@
                                 }
                                 @else { 
                                   <div class="flex-container">
-                                      {{ getBggGameInfo(item)?.min_play_time }} <ng-container *ngIf="getBggGameInfo(item)?.max_play_time !== getBggGameInfo(item)?.min_play_time">- {{ getBggGameInfo(item)?.max_play_time }}</ng-container> minutes
+                                      {{ getBggGameInfo(item).min_play_time }} <ng-container *ngIf="getBggGameInfo(item)?.max_play_time !== getBggGameInfo(item)?.min_play_time">- {{ getBggGameInfo(item).max_play_time }}</ng-container> minutes
                                   </div>
                                 }
                               </td>
@@ -110,7 +111,7 @@
                                 }
                                 @else { 
                                     <div>
-                                    {{ getBggGameInfo(item)?.custom_fields?.Location }}
+                                    {{ getBggGameInfo(item).custom_fields.Location }}
                                     </div>
                                 }
                               </td>
@@ -124,11 +125,6 @@
                                   @else if (userSignedIn && gameExistsInList(item)) {
                                     <button class="btn btn-danger rounded" (click)="removeGameFromList(i, item)">
                                       <i class="bi bi-dash-lg"></i>
-                                    </button>
-                                  }
-                                  @else {
-                                    <button class="btn btn-primary rounded" [disabled]="checkIfUserGameListEmptyOrNull() || !userSignedIn" (click)="addGameToList(i, item)">
-                                        <i class="bi bi-plus-lg"></i>
                                     </button>
                                   }
                                 </div>
@@ -145,7 +141,7 @@
                                     </div>
                                   }
                                   @else {
-                                    <div class="col">{{ getBggGameInfo(item)?.min_players }} <ng-container *ngIf="getBggGameInfo(item)?.max_players !== getBggGameInfo(item)?.min_players">- {{ getBggGameInfo(item)?.max_players }}</ng-container></div>
+                                    <div class="col">{{ getBggGameInfo(item).min_players }} <ng-container *ngIf="getBggGameInfo(item).max_players !== getBggGameInfo(item).min_players">- {{ getBggGameInfo(item).max_players }}</ng-container></div>
                                   }
                                   <div class="col">Play Time:</div>
                                   @if(!getBggGameInfo(item)) {
@@ -154,7 +150,7 @@
                                     </div>
                                   }
                                   @else {
-                                    <div class="col">{{ getBggGameInfo(item)?.min_play_time }} <ng-container *ngIf="getBggGameInfo(item)?.max_play_time !== getBggGameInfo(item)?.min_play_time">- {{ getBggGameInfo(item)?.max_play_time }}</ng-container> minutes</div>
+                                    <div class="col">{{ getBggGameInfo(item).min_play_time }} <ng-container *ngIf="getBggGameInfo(item).max_play_time !== getBggGameInfo(item).min_play_time">- {{ getBggGameInfo(item).max_play_time }}</ng-container> minutes</div>
                                   }
                                   <div class="col">Location:</div>
                                   @if(!getBggGameInfo(item)) {
@@ -163,7 +159,7 @@
                                     </div>
                                   }
                                   @else {
-                                    <div class="col">{{ getBggGameInfo(item)?.custom_fields?.Location }}</div>
+                                    <div class="col">{{ getBggGameInfo(item).custom_fields.Location }}</div>
                                   }
                                 </div>
                               </div>
@@ -189,6 +185,14 @@
           <div id="pagination-container" class="pt-2">
               <ngb-pagination [collectionSize]="totalNumItems" [(page)]="pageNumber" [maxSize]="3" [rotate]="true" [boundaryLinks]="true" [pageSize]="pageSize"></ngb-pagination>
           </div>
+          <div id="select-container" class="pt-2">
+            <select style="width: fit-content;" class="form-select" name="pageSize" [(ngModel)]="pageSize">
+                <option [ngValue]="10">10 items per page</option>
+                <option [ngValue]="25">25 items per page</option>
+                <option [ngValue]="50">50 items per page</option>
+                <option [ngValue]="100">100 items per page</option>
+            </select>
+        </div>
         </div>
       </div>
 </div>

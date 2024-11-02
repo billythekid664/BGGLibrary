@@ -48,7 +48,8 @@ export class UserComponent implements OnInit, AfterViewInit {
   selectListValue: string = '';
   newListName: string = '';
   userGameLists?: UserGamelistRef[];
-  currentGameList: any[][] = [[]];
+  currentGameList: Game[] = [];
+  filteredGameList: Game[][] = [[]];
   shareEmail: string = '';
   showShareAlert: boolean = false;
   showShareErrorAlert: boolean = false;
@@ -58,6 +59,7 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.userService.checkAuth().subscribe((user: any) => {
       if (user) {
         this.userSignedIn = true;
+        this.loading = true;
         this.userService.fetchUser(user.uid).subscribe((user: User) => {
         });
         this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
@@ -72,8 +74,8 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.activeService.setActive(2);
     setTimeout(() => {
+      this.activeService.setActive(2);
       let nameHeader = this.headers.find(h => h.sortable === "name");
       if (!nameHeader) return;
       nameHeader.sort.emit({ column: "name", direction: "asc" });
@@ -81,25 +83,29 @@ export class UserComponent implements OnInit, AfterViewInit {
     }, 100);
   }
 
-  startFetch(delay = 500) {
+  startFetch(delay = 500, filter = false, refetchBggInfo = false) {
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => {
-      this.getBggInfo();
-      // this.getBggInfo(); TODO: get info for the current game page
+      if (filter) {
+        this.filterList();
+      }
+      if (refetchBggInfo) {
+        this.getBggInfo();
+      }
     }, delay);
   }
 
   getBggInfo() {
     this.bggGameMap.clear();
-    this.currentGameList[this.listIndex()]?.forEach((game: Game) => {
+    this.filteredGameList.flat()?.forEach((game: Game) => {
       this.bggService.getBggGameInfo(game.id!).subscribe((item: any) => {
         this.bggGameMap.set(game.id!, item.result);
       });
     });
   }
 
-  getBggGameInfo(game: Game) {
-    return this.bggGameMap.get(game.id!);
+  getBggGameInfo(game: Game): BggItem {
+    return this.bggGameMap.get(game.id!)!;
   }
 
   getColSpan(): number {
@@ -117,6 +123,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   onSelected() {
+    this.loading = true;
     if (!this.selectListValue) {
       return;
     }
@@ -125,9 +132,13 @@ export class UserComponent implements OnInit, AfterViewInit {
       let newList = data?.gameList?.sort((a, b) => {
           return a?.name?.localeCompare(b?.name || '') || 0;
       });
-      this.currentGameList = this.chunk(newList || [], 10);
-      this.startFetch(0);
+      this.currentGameList = newList || [];
+      this.filterList();
+      this.getBggInfo();
       this.getUserGameLists();
+      setTimeout(() => {
+        this.loading = false;
+      }, 200)
     });
   }
 
@@ -139,20 +150,6 @@ export class UserComponent implements OnInit, AfterViewInit {
 
   getUserGameLists() {
     this.userGameLists = this.userService.getCurrentUserGameLists();
-  }
-
-  addGameToList(index: number, game: BggItem) {
-    this.buttonLoading.set(index, true);
-    this.gameService.addGameToList(this.selectListValue, {
-      bgg_id: game?.bgg_id,
-      name: game?.name,
-      photo: game?.bgg_icon_uri,
-      id: game?.id
-    }).then((id: string) => {
-      setTimeout(() => {
-        this.buttonLoading.delete(index);
-      }, 200);
-    });
   }
 
   deleteGameListAndReferences() {
@@ -170,20 +167,28 @@ export class UserComponent implements OnInit, AfterViewInit {
 				header.direction = '';
 			}
 		});
-
 		this.sortColumn = column;
 		this.sortDirection = direction;
-    
-    let newList = (this.currentGameList.flat() as Game[]).sort((a: Game, b: Game) => {
+    let newList = this.filteredGameList.flat().sort((a: Game, b: Game) => {
+      let first: string = this.getBggGameInfo(a)?.[(column as keyof BggItem)] || '';
+      let second: string = this.getBggGameInfo(b)?.[(column as keyof BggItem)] || '';
       if (direction === 'asc') {
-        return this.getBggGameInfo(a)?.[(column as keyof BggItem)]?.localeCompare(this.getBggGameInfo(b)?.[(column as keyof BggItem)]) || 0;
+        return first?.localeCompare(second);
       } else {
-        return this.getBggGameInfo(b)?.[(column as keyof BggItem)]?.localeCompare(this.getBggGameInfo(a)?.[(column as keyof BggItem)]) || 0;
+        return second?.localeCompare(first);
       }
+
     });
-    this.currentGameList = this.chunk(newList, 10);
-    this.startFetch(100);
+    this.chunkFilteredList(newList);
 	}
+
+  getAvailabilityText(item: Game): string {
+    let bggItem = this.getBggGameInfo(item);
+    if (bggItem.is_checked_out === 0) {
+      return 'Available';
+    }
+    return `Checked out ${this.getLastcheckoutTime(bggItem.last_checkout_date)}`;
+  }
 
   getLastcheckoutTime(datetime: any) {
     let timezone = moment.tz.guess();
@@ -226,7 +231,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   gameExistsInList(game: Game) {
-    return this.currentGameList.flat()?.some(g => g.id === game.id);
+    return this.filteredGameList.flat()?.some(g => g.id === game.id);
   }
 
   removeGameFromList(index: number, game: Game) {
@@ -242,6 +247,20 @@ export class UserComponent implements OnInit, AfterViewInit {
         this.buttonLoading.delete(index);
       }, 200);
     });
+  }
+
+  chunkFilteredList(newList: Game[]) {
+    this.filteredGameList = !!newList && newList.length > 0 ? this.chunk(newList, this._pageSize) : [[]];
+  }
+
+  filterList() {
+    let newList = this.currentGameList.filter(g => {
+      return g.name?.toLocaleLowerCase().includes(this.searchTerm.toLocaleLowerCase())
+    });
+    this.chunkFilteredList(newList || []);
+    this.totalNumItems = newList.length || 0;
+    this.pageNumber = 1;
+
   }
 
   @HostListener('window:resize', ['$event'])
@@ -265,16 +284,16 @@ export class UserComponent implements OnInit, AfterViewInit {
 
   set pageNumber(pageNumber: number) {
     this._pageNumber = pageNumber;
-    this.startFetch(200);
+    this.startFetch(200, false, true);
   }
 
   set pageSize(pageSize: number) {
     this._pageSize = pageSize;
-    this.startFetch(200);
+    this.startFetch(200, true, true);
   }
 
   set searchTerm(searchTerm: string) {
     this._searchTerm = searchTerm;
-    this.startFetch(800);
+    this.startFetch(800, true);
   }
 }

@@ -178,7 +178,6 @@ export class TableComponent implements OnInit, AfterViewInit {
       return;
     }
     this.gameService.fetchGameList(this.selectListValue).then(data => {
-      console.log('gameData: ', data)
       this.currentGameList = data?.gameList;
       this.getUserGameLists();
     });
@@ -229,6 +228,13 @@ export class TableComponent implements OnInit, AfterViewInit {
       }, 3000);
       this.shareEmail = '';
     });
+  }
+
+  getAvailabilityText(item: BggItem): string {
+    if (item.is_checked_out === 0) {
+      return 'Available';
+    }
+    return `Checked out ${this.getLastcheckoutTime(item.last_checkout_date)}`;
   }
 
   get pageNumber() {
