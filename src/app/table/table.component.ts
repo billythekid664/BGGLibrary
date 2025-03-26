@@ -66,9 +66,9 @@ export class TableComponent implements OnInit, AfterViewInit {
           this.userGameLists = this.userService.getCurrentUserGameLists();
           if (this.firstLoad && !this.selectListValue) {
             this.selectListValue = gameLists?.[0]?.id || '';
-            this.onSelected();
             this.firstLoad = false;
           }
+          this.onSelected();
         });
       }
     });
