@@ -2,10 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { FirestoreService } from './firestore.service';
 import { USERS_DB, UserService } from './user.service';
 import { Game } from '../model/game.model';
-import { arrayRemove, arrayUnion, deleteDoc, where } from '@angular/fire/firestore';
-import { firstValueFrom, lastValueFrom, Observable, tap } from 'rxjs';
+import { arrayRemove, arrayUnion, where } from '@angular/fire/firestore';
+import { firstValueFrom } from 'rxjs';
 import { GameList } from '../model/gamelist.model';
-import { UserGamelistRef } from '../model/user-gamelist-ref.model';
+import { UserGameListRef } from '../model/user-gamelist-ref.model';
 import { User } from '../model/user.model';
 
 export const DATALIST_DB = {
@@ -51,7 +51,7 @@ export class GameService {
    }, this.userService.getCurrentUserData());
   }
 
-  private createSpecifiedUserGameList(gameList: UserGamelistRef, user: User): Promise<string> {
+  private createSpecifiedUserGameList(gameList: UserGameListRef, user: User): Promise<string> {
     let data = {
       id: gameList.id,
       name: gameList.name,
@@ -65,7 +65,7 @@ export class GameService {
     return firstValueFrom(this.firestore.getDocData(DATALIST_DB.DATA_LISTS, gameListId));
   }
 
-  fetchUsersWithGameList(gameListId: string): Promise<UserGamelistRef[]> {
+  fetchUsersWithGameList(gameListId: string): Promise<UserGameListRef[]> {
     return this.firestore.queryCollectionGroupData(USERS_DB.GAME_LISTS, where('id', '==', gameListId));
   }
 
@@ -80,9 +80,8 @@ export class GameService {
     });
   }
 
-  shareGameList(gameList: UserGamelistRef, email: string): Promise<string> {
+  shareGameList(gameList: UserGameListRef, email: string): Promise<string> {
     return this.firestore.queryCollectionData(USERS_DB.USERS, where('email', '==', email)).then((users: any) => {
-      console.log('Found users:', users);
       if (users.length === 0) {
         console.error(`No user found with email: ${email}`);
         return '';

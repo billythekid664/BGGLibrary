@@ -10,8 +10,7 @@ import { BggItem } from '../model/bgg.model';
 import { UserService } from '../service/user.service';
 import { GameService } from '../service/game.service';
 import { User } from '../model/user.model';
-import { firstValueFrom } from 'rxjs';
-import { UserGamelistRef } from '../model/user-gamelist-ref.model';
+import { UserGameListRef } from '../model/user-gamelist-ref.model';
 import { ActiveService } from '../service/active.service';
 
 @Component({
@@ -48,9 +47,8 @@ export class TableComponent implements OnInit, AfterViewInit {
   accordionItem: string = '';
   debounceTimer: any;
 
-  selectListValue: string = '';
   newListName: string = '';
-  userGameLists?: UserGamelistRef[];
+  userGameLists?: UserGameListRef[];
   currentGameList?: any[] = [];
   shareEmail: string = '';
   showShareAlert: boolean = false;
@@ -59,25 +57,25 @@ export class TableComponent implements OnInit, AfterViewInit {
   constructor() {}
 
   ngOnInit(): void {
+    console.log('ngOnInit firstLoad: ' + this.firstLoad);
     this.userService.checkAuth().subscribe((user: any) => {
       if (user) {
         this.userSignedIn = true;
-        this.userService.fetchUser(user.uid).subscribe((user: User) => {
-        });
+        this.userService.fetchUser(user.uid).subscribe((user: User) => {});
         this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
-          if (this.firstLoad) {
+          this.userGameLists = this.userService.getCurrentUserGameLists();
+          if (this.firstLoad && !this.selectListValue) {
             this.selectListValue = gameLists?.[0]?.id || '';
             this.onSelected();
             this.firstLoad = false;
           }
-          
         });
       }
     });
   }
 
   ngAfterViewInit() {
-    this.activeService.setActive(1);
+    this.activeService.setActiveNavTab(1);
     setTimeout(() => {
       let nameHeader = this.headers.find(h => h.sortable === "name");
       if (!nameHeader) return;
@@ -165,10 +163,6 @@ export class TableComponent implements OnInit, AfterViewInit {
     });
   }
 
-  getUserGameLists() {
-    this.userGameLists = this.userService.getCurrentUserGameLists();
-  }
-
   checkIfUserGameListEmptyOrNull() {
     return !this.userGameLists || (this.userGameLists?.length || 0) < 1;
   }
@@ -179,7 +173,7 @@ export class TableComponent implements OnInit, AfterViewInit {
     }
     this.gameService.fetchGameList(this.selectListValue).then(data => {
       this.currentGameList = data?.gameList;
-      this.getUserGameLists();
+      this.userGameLists = this.userService.getCurrentUserGameLists();
     });
   }
 
@@ -205,15 +199,15 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   deleteGameListAndReferences() {
-    this.gameService.deleteGameListAndReferences(this.selectListValue).then(listId => {
+    this.gameService.deleteGameListAndReferences(this.userService.getCurrentGameList()!.id).then(listId => {
       this.userGameLists = this.userGameLists?.filter(list => list.id !== listId);
-      this.selectListValue = this.userGameLists?.[0].id || '';
+      this.userService.setCurrentGameList(this.userGameLists?.[0]);
       this.onSelected();
     });
   }
 
   shareGameList() {
-    let gameList = this.userGameLists?.find(item => item.id === this.selectListValue)!;
+    let gameList = this.userGameLists?.find(item => item.id === this.userService.getCurrentGameList()?.id)!;
     this.gameService.shareGameList(gameList, this.shareEmail).then(id => {
       if (!id || id === '') {
         console.error('Failed to share game list');
@@ -260,8 +254,16 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   set searchTerm(searchTerm: string) {
-    this._searchTerm = searchTerm;
+    this._searchTerm = searchTerm?.trim();
     this.startFetch(800);
+  }
+
+  get selectListValue() {
+    return this.userService.getCurrentGameList()?.id || "";
+  }
+
+  set selectListValue(id: string) {
+    this.userService.setCurrentGameList(this.userGameLists?.find(item => item.id === id));
   }
 
 }

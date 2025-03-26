@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { UserGameListRef } from '../model/user-gamelist-ref.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActiveService {
-  private active: BehaviorSubject <number> = new BehaviorSubject(1);
-  activeObservable: Observable<number> = this.active.asObservable();
+  private activeNavTab: BehaviorSubject<number> = new BehaviorSubject(1);
+  private activeNavTabObservable: Observable<number> = this.activeNavTab.asObservable();
 
-  checkActive(): Observable<number> {
-    return this.activeObservable;
+  checkActiveNavTab(): Observable<number> {
+    return this.activeNavTabObservable;
   }
 
-  setActive(value: number): void {
-    this.active.next(value);
+  setActiveNavTab(value: number): void {
+    this.activeNavTab.next(value);
   }
 }

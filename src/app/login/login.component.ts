@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-      this.activeService.setActive(3)
+      this.activeService.setActiveNavTab(3)
   }
 
   ngOnDestroy(): void {

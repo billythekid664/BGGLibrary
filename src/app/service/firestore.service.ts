@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { addDoc, arrayUnion, collection, collectionData, collectionGroup, deleteDoc, doc, docData, Firestore, getDocs, limitToLast, orderBy, query, QueryFieldFilterConstraint, setDoc, updateDoc, where } from '@angular/fire/firestore';
 import { debounceTime, exhaustAll, lastValueFrom, mergeAll, Observable, takeLast, tap, firstValueFrom } from 'rxjs';
-import { UserGamelistRef } from '../model/user-gamelist-ref.model';
+import { UserGameListRef } from '../model/user-gamelist-ref.model';
 
 @Injectable({
   providedIn: 'root'
