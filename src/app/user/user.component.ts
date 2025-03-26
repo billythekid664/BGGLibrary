@@ -6,9 +6,8 @@ import { GameService } from '../service/game.service';
 import { NgbdSortableHeader } from '../directive/ngbd-sortable-header.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { UserGamelistRef } from '../model/user-gamelist-ref.model';
+import { UserGameListRef } from '../model/user-gamelist-ref.model';
 import { BggItem } from '../model/bgg.model';
-import { firstValueFrom } from 'rxjs';
 import { User } from '../model/user.model';
 import moment from 'moment';
 import { Game } from '../model/game.model';
@@ -45,9 +44,8 @@ export class UserComponent implements OnInit, AfterViewInit {
   accordionItem: string = '';
   debounceTimer: any;
 
-  selectListValue: string = '';
   newListName: string = '';
-  userGameLists?: UserGamelistRef[];
+  userGameLists?: UserGameListRef[];
   currentGameList: Game[] = [];
   filteredGameList: Game[][] = [[]];
   shareEmail: string = '';
@@ -63,11 +61,12 @@ export class UserComponent implements OnInit, AfterViewInit {
         this.userService.fetchUser(user.uid).subscribe((user: User) => {
         });
         this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
-          if (this.firstLoad) {
+          this.userGameLists = this.userService.getCurrentUserGameLists();
+          if (this.firstLoad && !this.selectListValue) {
             this.selectListValue = gameLists?.[0]?.id || '';
-            this.onSelected();
             this.firstLoad = false;
           }
+          this.onSelected();
         });
       }
     });
@@ -75,7 +74,7 @@ export class UserComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     setTimeout(() => {
-      this.activeService.setActive(2);
+      this.activeService.setActiveNavTab(2);
       let nameHeader = this.headers.find(h => h.sortable === "name");
       if (!nameHeader) return;
       nameHeader.sort.emit({ column: "name", direction: "asc" });
@@ -293,7 +292,15 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   set searchTerm(searchTerm: string) {
-    this._searchTerm = searchTerm;
+    this._searchTerm = searchTerm?.trim();
     this.startFetch(800, true);
+  }
+
+  get selectListValue() {
+    return this.userService.getCurrentGameList()?.id || "";
+  }
+
+  set selectListValue(id: string) {
+    this.userService.setCurrentGameList(this.userGameLists?.find(item => item.id === id));
   }
 }

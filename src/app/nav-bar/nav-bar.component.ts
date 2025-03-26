@@ -41,14 +41,14 @@ export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!!user?.uid) {
           this.getUserData(user.uid);
           if (![1,2,3].includes(this.active)) {
-            this.activeService.setActive(1);
+            this.activeService.setActiveNavTab(1);
           }
         }
     });
   }
 
   ngAfterViewInit(): void {
-    this.activeService.checkActive().subscribe((active: number) => {
+    this.activeService.checkActiveNavTab().subscribe((active: number) => {
       this.active = active;
     });
   }
@@ -59,7 +59,7 @@ export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleNavClick(index: number): void {
-    this.activeService.setActive(index);
+    this.activeService.setActiveNavTab(index);
     document.getElementById('navToggleButton')?.click();
   }
 
