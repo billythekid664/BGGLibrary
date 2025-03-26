@@ -57,7 +57,6 @@ export class TableComponent implements OnInit, AfterViewInit {
   constructor() {}
 
   ngOnInit(): void {
-    console.log('ngOnInit firstLoad: ' + this.firstLoad);
     this.userService.checkAuth().subscribe((user: any) => {
       if (user) {
         this.userSignedIn = true;
@@ -156,7 +155,6 @@ export class TableComponent implements OnInit, AfterViewInit {
 
   createNewList() {
     this.gameService.createGameList(this.newListName).then((id: string) => {
-      console.log('id: ', id);
       this.selectListValue = id;
       this.newListName = '';
       this.onSelected();

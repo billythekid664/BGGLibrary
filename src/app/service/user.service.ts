@@ -59,12 +59,10 @@ export class UserService {
   }
 
   getCurrentGameList(): UserGameListRef | undefined {
-    console.log("getCurrentGameList: " + JSON.stringify(this.currentGameList));
     return this.currentGameList;
   }
 
   setCurrentGameList(gameList: UserGameListRef | undefined): void {
-    console.log("setCurrentGameList: " + JSON.stringify(gameList));
     this.currentGameList = gameList;
   }
 
