@@ -199,15 +199,15 @@ export class TableComponent implements OnInit, AfterViewInit {
   }
 
   deleteGameListAndReferences() {
-    this.gameService.deleteGameListAndReferences(this.userService.getCurrentGameList()!.id).then(listId => {
+    this.gameService.deleteGameListAndReferences(this.selectListValue).then(listId => {
       this.userGameLists = this.userGameLists?.filter(list => list.id !== listId);
-      this.userService.setCurrentGameList(this.userGameLists?.[0]);
+      this.selectListValue = this.userGameLists?.[0].id || '';
       this.onSelected();
     });
   }
 
   shareGameList() {
-    let gameList = this.userGameLists?.find(item => item.id === this.userService.getCurrentGameList()?.id)!;
+    let gameList = this.userGameLists?.find(item => item.id === this.selectListValue)!;
     this.gameService.shareGameList(gameList, this.shareEmail).then(id => {
       if (!id || id === '') {
         console.error('Failed to share game list');
