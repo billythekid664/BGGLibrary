@@ -121,8 +121,8 @@ export class UserComponent implements OnInit, AfterViewInit {
     return !this.userGameLists || (this.userGameLists?.length || 0) < 1;
   }
 
-  onSelected() {
-    this.loading = true;
+  onSelected(showLoading = true) {
+    this.loading = showLoading
     if (!this.selectListValue) {
       return;
     }
@@ -241,7 +241,7 @@ export class UserComponent implements OnInit, AfterViewInit {
       photo: game?.photo,
       id: game?.id
     }).then(() => {
-      this.onSelected();
+      this.onSelected(false);
       setTimeout(() => {
         this.buttonLoading.delete(index);
       }, 200);
