@@ -57,12 +57,11 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.userService.checkAuth().subscribe((user: any) => {
       if (user) {
         this.userSignedIn = true;
-        this.loading = true;
         this.userService.fetchUser(user.uid).subscribe((user: User) => {
         });
         this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
           this.userGameLists = this.userService.getCurrentUserGameLists();
-          if (this.firstLoad && !this.selectListValue) {
+          if (this.firstLoad || !this.selectListValue) {
             this.selectListValue = gameLists?.[0]?.id || '';
             this.firstLoad = false;
           }
@@ -79,7 +78,12 @@ export class UserComponent implements OnInit, AfterViewInit {
       if (!nameHeader) return;
       nameHeader.sort.emit({ column: "name", direction: "asc" });
       nameHeader.direction = "asc";
+      this.onSelected();
     }, 100);
+    setTimeout(() => {
+      this.onSelected();
+      this.startFetch();
+    }, 400);
   }
 
   startFetch(delay = 500, filter = false, refetchBggInfo = false) {
@@ -122,19 +126,19 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   onSelected(showLoading = true) {
-    this.loading = showLoading
     if (!this.selectListValue) {
       return;
     }
+    console.log('selected: ', this.selectListValue);
+    this.loading = showLoading
     this.gameService.fetchGameList(this.selectListValue).then(data => {
-      this.totalNumItems = data?.gameList?.length || 0
       let newList = data?.gameList?.sort((a, b) => {
           return a?.name?.localeCompare(b?.name || '') || 0;
       });
       this.currentGameList = newList || [];
       this.filterList();
       this.getBggInfo();
-      this.getUserGameLists();
+      this.userGameLists = this.userService.getCurrentUserGameLists();
       setTimeout(() => {
         this.loading = false;
       }, 200)
@@ -145,10 +149,6 @@ export class UserComponent implements OnInit, AfterViewInit {
     return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
       arr.slice(i * size, i * size + size)
     );
-  }
-
-  getUserGameLists() {
-    this.userGameLists = this.userService.getCurrentUserGameLists();
   }
 
   deleteGameListAndReferences() {
