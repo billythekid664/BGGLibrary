@@ -2,10 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { User } from '../model/user.model';
 import { Observable, tap } from 'rxjs';
 import { traceUntilFirst } from '@angular/fire/performance';
-import { Auth, authState, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut, UserCredential, browserSessionPersistence } from '@angular/fire/auth';
+import { Auth, authState, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut, UserCredential } from '@angular/fire/auth';
 import { FirestoreService } from './firestore.service';
 import { UserGameListRef } from '../model/user-gamelist-ref.model';
-import { Router } from '@angular/router';
 
 export const USERS_DB = {
     USERS: 'users',
@@ -21,10 +20,6 @@ export class UserService {
   private user!: User;
   private gameLists!: UserGameListRef[];
   private currentGameList?: UserGameListRef;
-
-  constructor() { 
-    this.auth.setPersistence(browserSessionPersistence);
-  }
 
   addUser(user: User): Promise<string> {
     return this.firestore.setDocData(user, USERS_DB.USERS, user.uid);
