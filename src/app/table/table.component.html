@@ -34,6 +34,8 @@
           <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" [disabled]="!userSignedIn"><i class="bi bi-gear-fill"></i></button>
           <ul class="dropdown-menu dropdown-menu-end">
             <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#renameModal" [disabled]="checkIfUserGameListEmptyOrNull()">Rename List</button>
             <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#shareModal" [disabled]="checkIfUserGameListEmptyOrNull()">Share List</button>
             <div class="dropdown-divider"></div>
             <button class="dropdown-item" type="button" [disabled]="checkIfUserGameListEmptyOrNull()" (click)="deleteGameListAndReferences()">Delete List</button>
@@ -174,7 +176,7 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="newListName = ''">Close</button>
         <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="createNewList()" [disabled]="newListName === ''">Save changes</button>
       </div>
     </div>
@@ -195,9 +197,31 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="shareEmail = ''">Close</button>
         <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="shareGameList()" [disabled]="shareEmail === ''">Save changes</button>
       </div>
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="shareModalLabel">Rename List</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <div class="form-floating mb-2 mt-4">
+            <input type="text" id="renameList" class="form-control" placeholder="" [(ngModel)]="renameList">
+            <label for="renameList">Name</label>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="renameList = ''">Close</button>
+        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="renameList()" [disabled]="renameList === ''">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
