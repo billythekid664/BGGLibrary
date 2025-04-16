@@ -62,10 +62,9 @@ export class UserComponent implements OnInit, AfterViewInit {
         this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
           this.userGameLists = this.userService.getCurrentUserGameLists();
           if (this.firstLoad || !this.selectListValue) {
-            this.selectListValue = gameLists?.[0]?.id || '';
+            this.onSelected();
             this.firstLoad = false;
           }
-          this.onSelected();
         });
       }
     });
