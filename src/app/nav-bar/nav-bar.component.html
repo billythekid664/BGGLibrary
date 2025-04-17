@@ -18,7 +18,13 @@
             </ul>
             <div class="d-flex align-items-center gap-2">
                 @if(loggedIn) {
-                    <span class="text-light">{{displayName}}</span>
+                    <!-- <span class="text-light">{{displayName}}</span> -->
+                    <div class="dropdown">
+                        <span class="text-light pointer" data-bs-toggle="dropdown" aria-expanded="false">{{displayName}}</span>
+                        <ul class="dropdown-menu" [ngClass]="docWidthLessThan768() ? 'dropdown-menu-start' : 'dropdown-menu-end'" id="dropdownMenuEmail">
+                            <span class="dropdown-item">{{email}}</span>
+                        </ul>
+                    </div>
                     <div class="vr mh-100" style="height: 40px; width: 2px;"></div>
                     <a class="nav-link text-light" href="#" (click)="logout(); handleNavClick(1)">Sign Out</a>
                 }

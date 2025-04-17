@@ -1,12 +1,20 @@
 <div class="parent-container table-responsive">
-    <div class="d-flex justify-content-center" *ngIf="showShareAlert">
-        <div class="alert alert-success d-flex align-items-center" role="alert" style="gap: 6px">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>
-            Game list was successfully shared
-            </div>
-        </div>
+  <div class="d-flex justify-content-center" *ngIf="showAlert">
+    <div class="alert alert-success d-flex align-items-center" role="alert" style="gap: 6px">
+      <i class="bi bi-check-circle-fill"></i>
+      <div>
+        {{alertText}}
+      </div>
     </div>
+  </div>
+  <div class="d-flex justify-content-center" *ngIf="showErrorAlert">
+    <div class="alert alert-warning d-flex align-items-center" role="alert" style="gap: 6px">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <div>
+        {{errorAlertText}}
+      </div>
+    </div>
+  </div>
     <div>
         <div class="d-flex mb-4 align-items-center justify-content-around flex-wrap" style="gap: 6px">
           <div class="form-floating">
@@ -28,6 +36,8 @@
                 <button class="dropdown-item" type="button" (click)="onSelected()">Refresh List</button>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal">Create List</button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#renameModal" [disabled]="checkIfUserGameListEmptyOrNull()">Rename List</button>
                 <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#shareModal" [disabled]="checkIfUserGameListEmptyOrNull()">Share List</button>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item" type="button" [disabled]="checkIfUserGameListEmptyOrNull()" (click)="deleteGameListAndReferences()">Delete List</button>
@@ -234,6 +244,27 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="shareGameList()" [disabled]="shareEmail === ''">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="shareModalLabel">Rename List</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-floating mb-2 mt-4">
+              <input type="text" id="renameList" class="form-control" placeholder="" [(ngModel)]="renameList">
+              <label for="renameList">Name</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="renameList = ''">Close</button>
+          <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="renameGameList()" [disabled]="renameList === ''">Save changes</button>
         </div>
       </div>
     </div>

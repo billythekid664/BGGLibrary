@@ -236,7 +236,6 @@ export class TableComponent implements OnInit, AfterViewInit {
         this.openAlert('Game list was successfully renamed');
       }
       this.renameList = '';
-      console.log('rename list id: ', gameList.id)
       this.onSelected(gameList.id);
     });
   }

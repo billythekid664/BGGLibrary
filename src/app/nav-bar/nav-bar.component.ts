@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { Auth, authState, signOut, user } from '@angular/fire/auth';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { traceUntilFirst } from '@angular/fire/performance';
@@ -27,6 +27,7 @@ export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
   querySub: any;
   redirectUrl = { redirectUrl: '/' }
   displayName?: string;
+  email?: string;
 
   ngOnInit(): void {
     this.querySub = this.route.queryParams.subscribe(params => {
@@ -66,8 +67,9 @@ export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getUserData(uid: string) {
     this.userService.fetchUser(uid).subscribe((user: any) => {
-      if (user) {
+      if (!!user) {
         this.displayName = `${user?.firstName} ${user?.lastName}`.normalize();
+        this.email = user.email;
       }
     });
   }
@@ -78,4 +80,9 @@ export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/']);
     this.active = 1;
   }
+
+  docWidthLessThan768() {
+    return document.body.clientWidth < 768;
+  }
+
 }
