@@ -29,6 +29,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   @ViewChildren(NgbdSortableHeader) headers!: QueryList<NgbdSortableHeader>;
 
   firstLoad: boolean = true;
+  stopRefresh = false;
 
   loading: boolean = false;
   buttonLoading: Map<number, boolean> = new Map();
@@ -49,8 +50,11 @@ export class UserComponent implements OnInit, AfterViewInit {
   currentGameList: Game[] = [];
   filteredGameList: Game[][] = [[]];
   shareEmail: string = '';
-  showShareAlert: boolean = false;
-  showShareErrorAlert: boolean = false;
+  renameList: string = '';
+  showAlert: boolean = false;
+  alertText: string = 'default';
+  showErrorAlert: boolean = false;
+  errorAlertText: string = 'default';
 
 
   ngOnInit() {
@@ -62,10 +66,9 @@ export class UserComponent implements OnInit, AfterViewInit {
         this.userService.fetchUserGameLists(user.uid).subscribe((gameLists: any) => {
           this.userGameLists = this.userService.getCurrentUserGameLists();
           if (this.firstLoad || !this.selectListValue) {
-            this.selectListValue = gameLists?.[0]?.id || '';
+            this.onSelected();
             this.firstLoad = false;
           }
-          this.onSelected();
         });
       }
     });
@@ -125,11 +128,10 @@ export class UserComponent implements OnInit, AfterViewInit {
     return !this.userGameLists || (this.userGameLists?.length || 0) < 1;
   }
 
-  onSelected(showLoading = true) {
+  onSelected(showLoading = true, overrideSelectedListId = '') {
     if (!this.selectListValue) {
       return;
     }
-    console.log('selected: ', this.selectListValue);
     this.loading = showLoading
     this.gameService.fetchGameList(this.selectListValue).then(data => {
       let newList = data?.gameList?.sort((a, b) => {
@@ -139,6 +141,11 @@ export class UserComponent implements OnInit, AfterViewInit {
       this.filterList();
       this.getBggInfo();
       this.userGameLists = this.userService.getCurrentUserGameLists();
+      if (overrideSelectedListId !== '') {
+        this.stopRefresh = true
+        this.selectListValue = overrideSelectedListId;
+        this.stopRefresh = false;
+      }
       setTimeout(() => {
         this.loading = false;
       }, 200)
@@ -203,7 +210,7 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.gameService.createGameList(this.newListName).then((id: string) => {
       this.selectListValue = id;
       this.newListName = '';
-      this.onSelected();
+      this.onSelected(true, id);
     });
   }
 
@@ -212,15 +219,11 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.gameService.shareGameList(gameList, this.shareEmail).then(id => {
       if (!id || id === '') {
         console.error('Failed to share game list');
-        this.showShareErrorAlert = true;
+        this.openAlert("Email doesn't exist", true)
       }
       else {
-        this.showShareAlert = true;
+        this.openAlert('Game list was successfully shared');
       }
-      setTimeout(() => {
-        this.showShareAlert = false;
-        this.showShareErrorAlert = false;
-      }, 3000);
       this.shareEmail = '';
     });
   }
@@ -260,6 +263,35 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.totalNumItems = newList.length || 0;
     this.pageNumber = 1;
 
+  }
+
+  renameGameList() {
+    let gameList = this.userGameLists?.find(item => item.id === this.selectListValue)!;
+    this.gameService.renameGameList(gameList, this.renameList).then(id => {
+      if (!id || id === '') {
+        console.error('Failed to rename game list');
+        this.openAlert("Unable to rename list", true)
+      }
+      else {
+        this.openAlert('Game list was successfully renamed');
+      }
+      this.renameList = '';
+      this.onSelected(false, gameList.id);
+    });
+  }
+
+  openAlert(text: string, error = false) {
+    if (!error) {
+      this.alertText = text;
+      this.showAlert = true;
+    } else {
+      this.errorAlertText = text;
+      this.showErrorAlert = true;
+    }
+    setTimeout(() => {
+      this.showAlert = false;
+      this.showErrorAlert = false;
+    }, 3000);
   }
 
   @HostListener('window:resize', ['$event'])

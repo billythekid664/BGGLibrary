@@ -47,7 +47,7 @@ export class GameService {
   createUserGameList(gameListId: string, gameListName: string): Promise<string> {
    return this.createSpecifiedUserGameList({
     id: gameListId,
-    name: gameListName
+    name: gameListName,
    }, this.userService.getCurrentUserData());
   }
 
@@ -56,7 +56,7 @@ export class GameService {
       id: gameList.id,
       name: gameList.name,
       userId: user.uid,
-      owner: gameList?.ownerId ? gameList.ownerId : user.uid 
+      owner: gameList?.owner ? gameList.owner : user.uid 
     }
     return this.firestore.createSubDocData(data, USERS_DB.USERS, user.uid, USERS_DB.GAME_LISTS, gameList.id);
   }
@@ -87,6 +87,21 @@ export class GameService {
         return '';
       }
       return this.createSpecifiedUserGameList(gameList, users[0]);
+    });
+  }
+
+  renameGameList(gameList: UserGameListRef, newGameListName: string): Promise<string> {
+    return this.firestore.updateDocData({
+      name: newGameListName
+    }, DATALIST_DB.DATA_LISTS, gameList.id).then(id => {
+      this.fetchUsersWithGameList(id).then(dataArray => {
+        dataArray.forEach(userGameList => {
+          this.firestore.updateDocData({
+            name: newGameListName
+          }, USERS_DB.USERS, userGameList.userId!, USERS_DB.GAME_LISTS, id)
+        });
+      });
+      return id;
     });
   }
 }

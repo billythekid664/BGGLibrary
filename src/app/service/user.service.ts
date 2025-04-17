@@ -37,7 +37,9 @@ export class UserService {
     return this.firestore.getCollectionData(USERS_DB.USERS, uid, USERS_DB.GAME_LISTS).pipe(
       tap(gameLists => {
         this.gameLists = gameLists;
-        this.currentGameList = gameLists[0];
+        if (!this.getCurrentGameList()) {
+          this.setCurrentGameList(gameLists[0]);
+        }
       })
     );
   }
