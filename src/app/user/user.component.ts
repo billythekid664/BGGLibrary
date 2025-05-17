@@ -135,7 +135,7 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.loading = showLoading
     this.gameService.fetchGameList(this.selectListValue).then(data => {
       let newList = data?.gameList?.sort((a, b) => {
-          return a?.name?.localeCompare(b?.name || '') || 0;
+        return a?.name?.localeCompare(b?.name || '') || 0;
       });
       this.currentGameList = newList || [];
       this.filterList();
