@@ -124,9 +124,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   onSubmit() {
     this.userService.signUserIn(this.loginForm.value.email, this.loginForm.value.password).then((userCredential: any) => {
       this.router.navigate([this.redirectUrl]);
-     }).catch((error: any) => {
-      this.cantLogin = true;
-     });
+      }).catch((error: any) => {
+        this.cantLogin = true;
+      });
   }
 
   onSubmitRegister() {
@@ -137,7 +137,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         firstName: this.loginForm.value.firstName,
         lastName: this.loginForm.value.lastName,
         provider: (additionalInfo?.providerId || 'firebase'),
-        email: userCredential.user.email
+        email: userCredential.user.email?.toLocaleLowerCase()
       });
       this.router.navigate([this.redirectUrl]);
     }).catch((error: any) => {
@@ -155,7 +155,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
           firstName: userCredential.user.displayName.split(' ')[0],
           lastName: userCredential.user.displayName.split(' ')[1],
           provider: userCredential.providerId,
-          email: userCredential.user.email
+          email: userCredential.user.email?.toLocaleLowerCase()
         });
       }
       this.router.navigate([this.redirectUrl]);

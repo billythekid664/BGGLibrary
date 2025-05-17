@@ -216,7 +216,7 @@ export class UserComponent implements OnInit, AfterViewInit {
 
   shareGameList() {
     let gameList = this.userGameLists?.find(item => item.id === this.selectListValue)!;
-    this.gameService.shareGameList(gameList, this.shareEmail).then(id => {
+    this.gameService.shareGameList(gameList, this.shareEmail?.toLocaleLowerCase()).then(id => {
       if (!id || id === '') {
         console.error('Failed to share game list');
         this.openAlert("Email doesn't exist", true)
