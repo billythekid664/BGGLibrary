@@ -1,7 +1,7 @@
 <div class="login-container">
     <div *ngIf="!!loginForm" class="shadow rounded card text-center bg-body mx-2 login-card">
         <div class="card-body">
-            <h1 class="mt-4 mb-4">{{ !isRegister ? 'Sign In' : 'Sign Up' }}</h1>
+            <h1 class="mt-4 mb-4">{{ !isRegister ? 'Login' : 'Sign Up' }}</h1>
             @if (!isRegister) {
                 @if (cantLogin) {
                     <div class="text-danger">
@@ -30,7 +30,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" [attr.disabled]="loginForm.invalid ? '' : undefined" class="btn btn-primary ps-4 pe-4 mb-3">Submit</button>
+                        <button type="submit" [attr.disabled]="loginForm.invalid ? '' : undefined" class="btn btn-primary ps-4 pe-4 mb-3">Login</button>
                     </div>
                 </form>
             }
@@ -91,7 +91,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" [attr.disabled]="loginForm.invalid ? '' : undefined" class="btn btn-primary ps-4 pe-4 mb-3">Submit</button>
+                        <button type="submit" [attr.disabled]="loginForm.invalid ? '' : undefined" class="btn btn-primary ps-4 pe-4 mb-3">Sign Up</button>
                     </div>
 
                 </form>
@@ -99,7 +99,7 @@
             <br/>
             <br/>
             <div>
-                <div class="text-center custom-divider mb-3">Or sign in with</div>
+                <div class="text-center custom-divider mb-3">Or login with</div>
                 <button class="btn btn-outline-primary text-center mb-3" (click)="googleLogin()">
                     <i class="bi bi-google"></i> Google
                 </button>
@@ -113,7 +113,7 @@
                 }
                 @else {
                     <span class="grey-color">Have an account?</span>
-                    <button class="btn btn-link btn-sm" (click)="toggleRegister()">Sign In</button>
+                    <button class="btn btn-link btn-sm" (click)="toggleRegister()">Login</button>
                 }
             </div>
 
