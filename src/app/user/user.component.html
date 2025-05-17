@@ -26,7 +26,11 @@
               <div class="form-floating" style="min-width: 200px;">
                 <select id="gameListSelect" class="form-select" aria-label="Select Game List" placeholder="" [disabled]="checkIfUserGameListEmptyOrNull() || !userSignedIn" (change)="onSelected()" [(ngModel)]="selectListValue">
                   @for (gameList of userGameLists; track gameList.id;) {
-                    <option [value]="gameList.id">{{ gameList.name }}</option>
+                    <option [value]="gameList.id">{{ gameList.name }} 
+                      @if(!!totalNumItems && gameList.id === selectListValue) {
+                        ({{totalNumItems}})
+                      }
+                    </option>
                   }
                 </select>
                 <label for="gameListSelect">Game List</label>
