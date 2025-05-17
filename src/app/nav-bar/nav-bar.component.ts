@@ -61,7 +61,9 @@ export class NavBarComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleNavClick(index: number): void {
     this.activeService.setActiveNavTab(index);
-    document.getElementById('navToggleButton')?.click();
+    if (this.docWidthLessThan768()) {
+      document.getElementById('navToggleButton')?.click();
+    }
   }
 
 
