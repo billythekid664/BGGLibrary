@@ -176,8 +176,8 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="newListName = ''">Close</button>
-        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="createNewList()" [disabled]="newListName === ''">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="newListName = ''">Cancel</button>
+        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="createNewList()" [disabled]="newListName === ''">Create List</button>
       </div>
     </div>
   </div>
@@ -197,8 +197,8 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="shareEmail = ''">Close</button>
-        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="shareGameList()" [disabled]="shareEmail === ''">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="shareEmail = ''">Cancel</button>
+        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="shareGameList()" [disabled]="shareEmail === ''">Share list</button>
       </div>
     </div>
   </div>
@@ -208,7 +208,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="shareModalLabel">Rename List</h1>
+        <h1 class="modal-title fs-5" id="renameModalLabel">Rename List</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -218,8 +218,8 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="renameList = ''">Close</button>
-        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="renameGameList()" [disabled]="renameList === ''">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="renameList = ''">Cancel</button>
+        <button  type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="renameGameList()" [disabled]="renameList === ''">Rename list</button>
       </div>
     </div>
   </div>

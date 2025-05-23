@@ -31,6 +31,7 @@
                 <a class="nav-link text-light" href="#" (click)="logout(); handleNavClick(1)">Sign Out</a>
             }
             @else {
+                <div class="vr mh-100" style="height: 40px; width: 0px;"></div>
                 <a class="nav-link text-light" [ngClass]="active === 3 ? 'active fw-bolder' : ''" [routerLink]="['login']" [queryParams]="redirectUrl" (click)="handleNavClick(3)">
                     Sign In
                 </a>
