@@ -252,17 +252,16 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   chunkFilteredList(newList: Game[]) {
-    this.filteredGameList = !!newList && newList.length > 0 ? this.chunk(newList, this._pageSize) : [[]];
+    this.filteredGameList = !!newList && newList.length > 0 ? this.chunk(newList, this.pageSize) : [[]];
   }
 
   filterList() {
     let newList = this.currentGameList.filter(g => {
       return g.name?.toLocaleLowerCase().includes(this.searchTerm.toLocaleLowerCase())
     });
+    this._pageNumber = 1;
     this.chunkFilteredList(newList || []);
     this.totalNumItems = newList.length || 0;
-    this.pageNumber = 1;
-
   }
 
   renameGameList() {
@@ -319,6 +318,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   set pageSize(pageSize: number) {
+    this._pageNumber = 1;
     this._pageSize = pageSize;
     this.startFetch(200, true, true);
   }
